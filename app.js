@@ -261,4 +261,4 @@ function createPlaylist(code, username, title, description, trackURIs) {
 
 //getTopSongs("ABCD", "amittal26", 0, 50)
 
-module.exports = { getTopSongs, getAudioFeatures, createPlaylist };
+module.exports = { createSpotifyAPIObject, getTopSongs, getAudioFeatures, createPlaylist };
