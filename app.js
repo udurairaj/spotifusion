@@ -207,49 +207,46 @@ function createAuthURL() {
     return authorizeURL;
 }
 
-function createSpotifyAPIObject(code, username) {
+async function createSpotifyAPIObject(code, username) {
     // retrieve access and refresh token of username from database
     let access_token = "";
     let refresh_token = "";
     const dbRef = ref(database);
-    get(child(dbRef, code + "/members/" + username)).then((snapshot) => {
-        if (snapshot.exists()) {
-            access_token = snapshot.val().access_token;
-            refresh_token = snapshot.val().refresh_token;
-        } else {
-            console.log("No data available");
-        }
-    }).catch((error) => {
-        console.error(error);
-    });
+    let snapshot = await get(child(dbRef, code + "/members/" + username));
+    if (snapshot.exists()) {
+        access_token = snapshot.val().access_token;
+        refresh_token = snapshot.val().refresh_token;
+        const spotifyApi__ = new SpotifyWebApi({
+            clientId: 'd6cc8aeb975e401b9a736b0a64ae9f48',
+            clientSecret: 'aad2cb7f1c8d41c396b4f9c28ccfed66',
+            redirectUri: 'http://localhost:8888/callback'
+        });
 
-    const spotifyApi = new SpotifyWebApi({
-        clientId: 'd6cc8aeb975e401b9a736b0a64ae9f48',
-        clientSecret: 'aad2cb7f1c8d41c396b4f9c28ccfed66',
-        redirectUri: 'http://localhost:8888/callback'
-    });
+        spotifyApi__.setAccessToken(access_token);
+        spotifyApi__.setRefreshToken(refresh_token);
+        return spotifyApi__;
+    } else {
+        console.log("No data available");
+    }
 
-    spotifyApi.setAccessToken(access_token);
-    spotifyApi.setRefreshToken(refresh_token);
-    return spotifyApi;
 }
 
 // Returns array of songs
-function getTopSongs(code, username, offset, length) {
-    let spotifyApi = createSpotifyAPIObject(code, username);
-    spotifyApi.getMyTopTracks({ limit: length, offset: offset })
+async function getTopSongs(code, username, offset, length) {
+    let spotifyApi_ = await createSpotifyAPIObject(code, username);
+    spotifyApi_.getMyTopTracks({ limit: length, offset: offset })
         .then(function(data) {
             let topTracks = data.body.items;
             console.log(topTracks);
             return topTracks;
         }, function(err) {
-            console.log('Something went wrong!', err);
+            console.log('Something went wrong in gettopsongs!', err);
         });
 }
 
 // Returns array of audio features
-function getAudioFeatures(code, username, trackIDs) {
-    let spotifyApi = createSpotifyAPIObject(code, username);
+async function getAudioFeatures(code, username, trackIDs) {
+    let spotifyApi = await createSpotifyAPIObject(code, username);
     spotifyApi.getAudioFeaturesForTracks(trackIDs)
         .then(function(data) {
             console.log(data.body);
@@ -260,8 +257,8 @@ function getAudioFeatures(code, username, trackIDs) {
 }
 
 // Returns URI of created playlist to embed into web app
-function createPlaylist(code, username, title, description, trackURIs) {
-    let spotifyApi = createSpotifyAPIObject(code, username);
+async function createPlaylist(code, username, title, description, trackURIs) {
+    let spotifyApi = await createSpotifyAPIObject(code, username);
     let id = "";
 
     spotifyApi.createPlaylist(title, { 'description': description, 'public': true })
@@ -282,8 +279,8 @@ function createPlaylist(code, username, title, description, trackURIs) {
 }
 
 // Returns array of songs
-function getMyInfo(code, username) {
-    let spotifyApi = createSpotifyAPIObject(code, username);
+async function getMyInfo(code, username) {
+    let spotifyApi = await createSpotifyAPIObject(code, username);
     spotifyApi.getMyTopTracks({ limit: length, offset: offset })
         .then(function(data) {
             let topTracks = data.body.items;
@@ -293,15 +290,5 @@ function getMyInfo(code, username) {
             console.log('Something went wrong!', err);
         });
 }
-
-//getTopSongs("ABCD", "amittal26", 0, 50)
-let spotifyApi_ = createSpotifyAPIObject("ABCD", "amittal26");
-spotifyApi_.getMyTopTracks({ limit: 50, offset: 0 })
-    .then(function(data) {
-        let topTracks = data.body.items;
-        console.log(topTracks);
-    }, function(err) {
-        console.log('Something went wrong!', err);
-    });
 
 module.exports = { createAuthURL, createSpotifyAPIObject, getTopSongs, getAudioFeatures, createPlaylist };
