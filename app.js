@@ -186,6 +186,27 @@ app.get('/refresh_token', function(req, res) {
 console.log('Listening on 8888');
 app.listen(8888);
 
+function createAuthURL() {
+    var scopes = ['user-read-private', 'user-read-email'],
+        redirectUri = 'http://localhost:8888/createjoin.html',
+        clientId = 'd6cc8aeb975e401b9a736b0a64ae9f48',
+        state = 'spotify_auth_state';
+
+
+    // Setting credentials can be done in the wrapper's constructor, or using the API object's setters.
+    var spotifyApi = new SpotifyWebApi({
+        redirectUri: redirectUri,
+        clientId: clientId
+    });
+
+    // Create the authorization URL
+    var authorizeURL = spotifyApi.createAuthorizeURL(scopes, state);
+
+    // https://accounts.spotify.com:443/authorize?client_id=5fe01282e44241328a84e7c5cc169165&response_type=code&redirect_uri=https://example.com/callback&scope=user-read-private%20user-read-email&state=some-state-of-my-choice
+    console.log(authorizeURL);
+    return authorizeURL;
+}
+
 function createSpotifyAPIObject(code, username) {
     // retrieve access and refresh token of username from database
     let access_token = "";
@@ -210,6 +231,7 @@ function createSpotifyAPIObject(code, username) {
 
     spotifyApi.setAccessToken(access_token);
     spotifyApi.setRefreshToken(refresh_token);
+    return spotifyApi;
 }
 
 // Returns array of songs
@@ -259,6 +281,27 @@ function createPlaylist(code, username, title, description, trackURIs) {
         });
 }
 
+// Returns array of songs
+function getMyInfo(code, username) {
+    let spotifyApi = createSpotifyAPIObject(code, username);
+    spotifyApi.getMyTopTracks({ limit: length, offset: offset })
+        .then(function(data) {
+            let topTracks = data.body.items;
+            console.log(topTracks);
+            return topTracks;
+        }, function(err) {
+            console.log('Something went wrong!', err);
+        });
+}
+
 //getTopSongs("ABCD", "amittal26", 0, 50)
+let spotifyApi_ = createSpotifyAPIObject("ABCD", "amittal26");
+spotifyApi_.getMyTopTracks({ limit: 50, offset: 0 })
+    .then(function(data) {
+        let topTracks = data.body.items;
+        console.log(topTracks);
+    }, function(err) {
+        console.log('Something went wrong!', err);
+    });
 
 module.exports = { createSpotifyAPIObject, getTopSongs, getAudioFeatures, createPlaylist };
