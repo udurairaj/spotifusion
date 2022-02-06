@@ -304,4 +304,4 @@ spotifyApi_.getMyTopTracks({ limit: 50, offset: 0 })
         console.log('Something went wrong!', err);
     });
 
-module.exports = { createSpotifyAPIObject, getTopSongs, getAudioFeatures, createPlaylist };
+module.exports = { createAuthURL, createSpotifyAPIObject, getTopSongs, getAudioFeatures, createPlaylist };
