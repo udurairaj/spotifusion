@@ -6,7 +6,7 @@
   * For more information, read
   * https://developer.spotify.com/web-api/authorization-guide/#authorization_code_flow
   */
- 
+
  var { initializeApp } = require('firebase/app');
  var { getDatabase, ref, get, child } = require('firebase/database');
  const firebaseConfig = {
@@ -21,8 +21,8 @@
  };
  const app_ = initializeApp(firebaseConfig);
  var database = getDatabase(app_);
- 
- 
+
+
  var express = require('express'); // Express web server framework
  var request = require('request'); // "Request" library
  var cors = require('cors');
@@ -30,11 +30,11 @@
  var cookieParser = require('cookie-parser');
  const SpotifyWebApi = require('spotify-web-api-node');
  const url = require('url').URL;
- 
- 
+
+
  var client_id = 'd6cc8aeb975e401b9a736b0a64ae9f48'; // Your client id
  var client_secret = 'aad2cb7f1c8d41c396b4f9c28ccfed66'; // Your secret
- var redirect_uri = 'http://localhost:8888/createjoin.html'; // Your redirect uri
+ var redirect_uri = 'http://localhost:8888/createjoin/'; // Your redirect uri
  var scopes = ['user-read-private', 'user-read-email', 'user-top-read', 'playlist-modify-public', 'playlist-read-collaborative'],
      state = 'spotify_auth_state';
  var mySpotifyApi = new SpotifyWebApi({
@@ -43,14 +43,16 @@
      clientSecret: client_secret
  });
  var authorizeURL = mySpotifyApi.createAuthorizeURL(scopes, state);
- 
+
  var app = express();
- 
+ var path = require('path');
+
+
  app.set('port', 8888);
  app.engine('html', require('ejs').renderFile);
  app.set('view engine', 'html');
- app.use(express.static(__dirname + '/public'));
- 
+ app.use(express.static(path.join(__dirname + '/views/')));
+
  async function createSpotifyAPIObject(code, username) {
      // retrieve access and refresh token of username from database
      let access_token = "";
@@ -65,16 +67,16 @@
              clientSecret: 'aad2cb7f1c8d41c396b4f9c28ccfed66',
              redirectUri: 'http://localhost:8888/createjoin.html'
          });
- 
+
          spotifyApi__.setAccessToken(access_token);
          spotifyApi__.setRefreshToken(refresh_token);
          return spotifyApi__;
      } else {
          console.log("No data available");
      }
- 
+
  }
- 
+
  // Returns array of songs
  async function getTopSongs(code, username, offset, length) {
      let spotifyApi = await createSpotifyAPIObject(code, username);
@@ -87,7 +89,7 @@
              console.log('Something went wrong in gettopsongs!', err);
          });
  }
- 
+
  // Returns array of audio features
  async function getAudioFeatures(code, username, trackIDs) {
      let spotifyApi = await createSpotifyAPIObject(code, username);
@@ -99,10 +101,10 @@
              done(err);
          });
  }
- 
+
  async function createPlaylistHelper(code, username, title, description) {
      let spotifyApi = await createSpotifyAPIObject(code, username);
- 
+
      return spotifyApi.createPlaylist(title, { 'description': description, 'public': true })
          .then(function(data) {
              //console.log('Created playlist!');
@@ -110,16 +112,16 @@
          }, function(err) {
              console.log('Something went wrong!', err);
          });
- 
+
  }
- 
+
  // Returns URI of created playlist to embed into web app
  async function createPlaylist(code, username, title, description, trackURIs) {
      let spotifyApi = await createSpotifyAPIObject(code, username);
      let helper_promise = createPlaylistHelper(code, username, title, description);
      let id = "";
      helper_promise.then(function(result) { id = result; })
- 
+
      return spotifyApi.addTracksToPlaylist(id, trackURIs)
          .then(function(data) {
              //console.log('Added tracks to playlist!');
@@ -128,10 +130,10 @@
              console.log('Something went wrong!', err);
          });
  }
- 
+
  async function getPlaylists(code, username, offset, length) {
      let spotifyApi = await createSpotifyAPIObject(code, username);
- 
+
      return spotifyApi.getUserPlaylists(username, { limit: length, offset: offset })
          .then(function(data) {
              return data.body;
@@ -139,10 +141,10 @@
              console.log('Something went wrong!', err);
          });
  }
- 
+
  async function getPlaylistTracks(code, username, id) {
      let spotifyApi = await createSpotifyAPIObject(code, username);
- 
+
      return spotifyApi.getPlaylist(id)
          .then(function(data) {
                  return data.body.tracks;
@@ -151,7 +153,7 @@
                  console.log('Something went wrong!', err);
              });
  }
- 
+
  // Returns array of songs
  async function getMyInfo(code, username) {
      let spotifyApi = await createSpotifyAPIObject(code, username);
@@ -163,9 +165,9 @@
              console.log('Something went wrong!', err);
          });
  }
- 
+
  let results = {};
- 
+
  function obtain_results(success, fail) {
      mySpotifyApi.getMe().then(function(data) {
          results['display_name'] = data.body['display_name'];
@@ -176,25 +178,26 @@
          console.error(err);
          fail();
      })
- 
+
  }
- 
+
  app.get('/', function(req, res) {
      console.log(req.method + " " + req.route.path);
      res.render('index.html');
  });
- 
+
  app.post('/', function(req, res) {
      console.log(req.method + " " + req.route.path);
      res.redirect(authorizeURL);
  });
- 
+
  app.get('/createjoin', function(req, res) {
+     console.log("HELLO")
      console.log(req.method + " " + req.route.path);
- 
+
      const current_url = new url('localhost:8888' + req.url);
      const authCode = current_url.searchParams.get('code');
- 
+
      // Retrieve an access token and a refresh token
      mySpotifyApi.authorizationCodeGrant(authCode).then(
          function(data) {
@@ -202,10 +205,10 @@
              mySpotifyApi.setAccessToken(data.body['access_token']);
              mySpotifyApi.setRefreshToken(data.body['refresh_token']);
              console.log("ASUDGAISUDH:ASJHA:JFN");
-             obtain_results(data.body,
+             obtain_results(
                  function() {
                      results['access_token'] = data.body['access_token'];
-                     console.log("results is " + results)
+                     console.log("results is " + JSON.stringify(results))
                      res.render('createjoin.html', { results: JSON.stringify(results) });
                  },
                  function() { res.render('error.html'); });
@@ -218,7 +221,7 @@
                      mySpotifyApi.setAccessToken(data.body['access_token']);
                      mySpotifyApi.setRefreshToken(data.body['refresh_token']);
                      console.log('The access token has been refreshed!');
- 
+
                      obtain_results(
                          function() {
                              results['access_token'] = data.body['access_token'];
@@ -233,13 +236,15 @@
              );
          }
      );
- 
+
  });
- 
- 
+
+ app.get('loading.html', function(req, res) {
+     console.log("PPSTY POSTY");
+ });
+
+
  console.log('Listening on 8888');
  app.listen(8888);
- 
- module.exports = { createSpotifyAPIObject, getTopSongs, getAudioFeatures, createPlaylist };
- 
 
+ module.exports = { createSpotifyAPIObject, getTopSongs, getAudioFeatures, createPlaylist };
