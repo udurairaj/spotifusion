@@ -7,8 +7,8 @@
  * https://developer.spotify.com/web-api/authorization-guide/#authorization_code_flow
  */
 
-var firebase = require('firebase/app');
-require('firebase/database');
+var { initializeApp } = require('firebase/app');
+var { getDatabase, ref, get, child } = require('firebase/database');
 
 
 // TODO: Replace with your app's Firebase project configuration
@@ -23,10 +23,10 @@ const firebaseConfig = {
     measurementId: "G-31JNM3QML3"
 };
 
-firebase.initializeApp(firebaseConfig);
+const app_ = initializeApp(firebaseConfig);
 
 // Get a reference to the database service
-var database = firebase.database().ref();
+var database = getDatabase(app_);
 
 
 var express = require('express'); // Express web server framework
@@ -186,17 +186,22 @@ app.get('/refresh_token', function(req, res) {
 console.log('Listening on 8888');
 app.listen(8888);
 
-function createSpotifyAPIObject(username) {
+function createSpotifyAPIObject(code, username) {
     // retrieve access and refresh token of username from database
     let access_token = "";
     let refresh_token = "";
-    if (username == "amittal26") {
-        access_token = "BQCRXUP_UZ2O91Cn-7WXZlcfrJYjZZoxOpp22s9WmVScHzfy98ftr0VA1CZKGRpvza1sT6f4FPTX9rEZ9zCNV1ybvL41AHJjGq9Dn1ofCQd413pQl2XLs9KN5U8_wcD93h9CKk_PYjAluDfLuqMl-iAayo_Kbt2B";
-        refresh_token = "AQAu_n5M7D-N99jBw8Fue4Z4ij7qymA-30TiMmw238pUgnM0NnHMLnqFkGFv5mS33biYDFz0iomfHwYRyHIYDqF4xNjiklUtWZkDUO4H8418RLlycVZ4APhtccam2lI-Of0";
-    } else {
-        access_token = "BQDA5qF_qRGPK8qwlzXVoeM8Zelou4ciSBy6T52MMarkB8PRzIny4O0LyxFBP07VspXK8aU6YV4jXG3dmD6rG0hpX50cLUA3kAHVhPu8I1MgOaP2jvJLMelPlBllqeOQXIfsXzC0SAZshfK_IYPaX4qFRcmvvgro_jKciA";
-        refresh_token = "AQDethieTbJcBB7lsDUUWzzV9fAGDW-ReyTh9s-1BiEaIMS1yxaC6jA_Ay0UgMGd76v27WQg9ElIx_pha4bA5MVBT_fEQS9wYugHgNDNWvGpePozIFmUD9TVIwRsekLtASg";
-    }
+    const dbRef = ref(database);
+    get(child(dbRef, code + "/members/" + username)).then((snapshot) => {
+        if (snapshot.exists()) {
+            access_token = snapshot.val().access_token;
+            refresh_token = snapshot.val().refresh_token;
+        } else {
+            console.log("No data available");
+        }
+    }).catch((error) => {
+        console.error(error);
+    });
+
     const spotifyApi = new SpotifyWebApi({
         clientId: 'd6cc8aeb975e401b9a736b0a64ae9f48',
         clientSecret: 'aad2cb7f1c8d41c396b4f9c28ccfed66',
@@ -208,8 +213,8 @@ function createSpotifyAPIObject(username) {
 }
 
 // Returns array of songs
-function getTopSongs(username, offset, length) {
-    let spotifyApi = createSpotifyAPIObject(username);
+function getTopSongs(code, username, offset, length) {
+    let spotifyApi = createSpotifyAPIObject(code, username);
     spotifyApi.getMyTopTracks({ limit: length, offset: offset })
         .then(function(data) {
             let topTracks = data.body.items;
@@ -221,8 +226,8 @@ function getTopSongs(username, offset, length) {
 }
 
 // Returns array of audio features
-function getAudioFeatures(username, trackIDs) {
-    let spotifyApi = createSpotifyAPIObject(username);
+function getAudioFeatures(code, username, trackIDs) {
+    let spotifyApi = createSpotifyAPIObject(code, username);
     spotifyApi.getAudioFeaturesForTracks(trackIDs)
         .then(function(data) {
             console.log(data.body);
@@ -233,8 +238,8 @@ function getAudioFeatures(username, trackIDs) {
 }
 
 // Returns URI of created playlist to embed into web app
-function createPlaylist(username, title, description, trackURIs) {
-    let spotifyApi = createSpotifyAPIObject(username);
+function createPlaylist(code, username, title, description, trackURIs) {
+    let spotifyApi = createSpotifyAPIObject(code, username);
     let id = "";
 
     spotifyApi.createPlaylist(title, { 'description': description, 'public': true })
@@ -254,12 +259,4 @@ function createPlaylist(username, title, description, trackURIs) {
         });
 }
 
-function readFirebaseData(group) {
-    var starCountRef = firebase.database().ref(group);
-    starCountRef.on('value', (snapshot) => {
-        const data = snapshot.val();
-        console.log(data);
-    });
-}
-
-readFirebaseData("ABCD");
+createSpotifyAPIObject("ABCD", "amittal26")
