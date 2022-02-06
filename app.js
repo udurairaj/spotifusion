@@ -259,4 +259,6 @@ function createPlaylist(code, username, title, description, trackURIs) {
         });
 }
 
-createSpotifyAPIObject("ABCD", "amittal26")
+//getTopSongs("ABCD", "amittal26", 0, 50)
+
+module.exports = { getTopSongs, getAudioFeatures, createPlaylist };
