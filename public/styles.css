@@ -1,0 +1,102 @@
+body {
+	font-family: 'Raleway', sans-serif;
+	background-color: black;
+	color: white;
+}
+
+.masthead {
+  height: 100vh;
+  min-height: 500px;
+}
+
+.header {
+	background-color: #1DB954;
+	font-size: 20px;
+	border: none;
+}
+
+.pin-entry {
+	display: inline;
+	flex-direction: row;
+	width: 20%;
+}
+
+.btn-custom {
+	background-color: #1DB954;
+	font-size: 20px;
+	border: none;
+	color: black;
+	display: block;
+	margin: auto;
+	width: 250px;
+}
+
+.btn-custom-join {
+	background-color: #1DB954;
+	font-size: 20px;
+	border: none;
+	color: black;
+	display: block;
+	justify-content: left;
+	width: 125px;
+	height: 60px;
+}
+
+#name-of-group {
+	font-size: 75px;
+}
+
+#access-code {
+	font-size: 70px;
+}
+
+#users-joined {
+	border: 4px solid #1DB954;
+}
+
+.center-box {
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.custom-input {
+	border-top-style: hidden;
+  border-right-style: hidden;
+  border-left-style: hidden;
+  border-bottom-style: groove;
+  border-bottom: 4px solid white;
+  background-color: black;
+  box-shadow: none;
+  font-size: 55px;
+  height: 75px;
+  color: #1DB954;
+  text-align: center;
+}
+
+.custom-input:focus {
+	outline: none !important;
+	outline-color: black;
+	background-color: black;
+	box-shadow: none;
+	color: white;
+}
+
+#pinform {
+	display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.spotify {
+	color: #1DB954;
+}
+
+/*#login, #loggedin {
+  display: none;
+}
+.text-overflow {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 500px;
+}*/
