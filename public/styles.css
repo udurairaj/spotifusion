@@ -52,6 +52,7 @@ body {
 
 #users-joined {
 	border: 4px solid #1DB954;
+	max-width: 500px;
 }
 
 .center-box {
@@ -81,6 +82,15 @@ body {
 	color: white;
 }
 
+.outer {
+	max-width: 650px;
+	text-align: center;
+}
+
+.display-name {
+	font-size: 20px;
+}
+
 #pinform {
 	display: flex;
   justify-content: center;
@@ -91,12 +101,88 @@ body {
 	color: #1DB954;
 }
 
-/*#login, #loggedin {
-  display: none;
+#time {
+	background-color: black;
+	border: 1px solid white;
 }
-.text-overflow {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  width: 500px;
-}*/
+
+@keyframes quiet {
+  25%{
+    transform: scaleY(.6);
+  }
+  50%{
+    transform: scaleY(.4);
+  }
+  75%{
+    transform: scaleY(.8);
+  }
+}
+
+@keyframes normal {
+  25%{
+    transform: scaleY(1);
+  }
+  50%{
+    transform: scaleY(.4);
+  }
+  75%{
+    transform: scaleY(.6);
+  }
+}
+@keyframes loud {
+  25%{
+    transform: scaleY(1);
+  }
+  50%{
+    transform: scaleY(.4);
+  }
+  75%{
+    transform: scaleY(1.2);
+  }
+}
+#animation {
+  display: flex;
+  justify-content: center;
+  background: black;
+  align-items: center;
+}
+
+.boxContainer{
+  display: flex;
+  justify-content: space-between;
+  height: 64px;
+  --boxSize: 8px;
+  --gutter: 4px;
+  width: calc((var(--boxSize) + var(--gutter)) * 5);
+}
+
+.box{
+  transform: scaleY(.4);
+  height: 100%;
+  width: var(--boxSize);
+  background: #1DB954;
+  animation-duration: 1.2s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  border-radius: 8px;
+}
+
+.box1{
+  animation-name: quiet;
+}
+
+.box2{
+  animation-name: normal;
+}
+
+.box3{
+  animation-name: quiet;
+}
+
+.box4{
+  animation-name: loud;
+}
+
+.box5{
+  animation-name: quiet;
+}

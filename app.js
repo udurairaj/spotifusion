@@ -38,7 +38,7 @@ const SpotifyWebApi = require('spotify-web-api-node');
 
 var client_id = 'd6cc8aeb975e401b9a736b0a64ae9f48'; // Your client id
 var client_secret = 'aad2cb7f1c8d41c396b4f9c28ccfed66'; // Your secret
-var redirect_uri = 'http://localhost:8888/callback'; // Your redirect uri
+var redirect_uri = 'http://localhost:8888/createjoin.html'; // Your redirect uri
 
 /**
  * Generates a random string containing numbers and letters
