@@ -168,12 +168,15 @@
              });
  }
 
+ // Returns whether the access code / group already exists in database
  async function accessCodeExists(code) {
      const dbRef = ref(database);
      let snapshot = await get(child(dbRef, code));
      return snapshot.exists();
  }
 
+ // If access code / group doesn't exist, creates group in database
+ // Adds user to group
  async function addToGroup(code, username) {
      const dbRef = ref(database);
      let snapshot = await get(child(dbRef, code + "/members/"));
@@ -202,6 +205,19 @@
          }, function(err) {
              console.log('Something went wrong!', err);
          });
+ }
+
+ // seed_tracks
+ async function getRecommendations(seed_tracks) {
+     return mySpotifyApi.getRecommendations({
+             seed_tracks: seed_tracks
+         })
+         .then(function(data) {
+             return data.body;
+         }, function(err) {
+             console.log("Something went wrong!", err);
+         });
+
  }
 
  let results = {};
