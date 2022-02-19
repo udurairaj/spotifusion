@@ -8,7 +8,7 @@
   */
 
  var { initializeApp } = require('firebase/app');
- var { getDatabase, ref, get, set, child } = require('firebase/database');
+ var { getDatabase, ref, get, set, child, update, push } = require('firebase/database');
  const firebaseConfig = {
      apiKey: "AIzaSyByARuOsxig3xXyLQo5v7rIdsl2zKz6V8g",
      authDomain: "spotifusion22.firebaseapp.com",
@@ -24,10 +24,6 @@
 
 
  var express = require('express'); // Express web server framework
- var request = require('request'); // "Request" library
- var cors = require('cors');
- var querystring = require('querystring');
- var cookieParser = require('cookie-parser');
  const SpotifyWebApi = require('spotify-web-api-node');
  const url = require('url').URL;
 
@@ -89,7 +85,7 @@
      let username = await getMyUsername();
      console.log("username " + username)
      const dbRef = ref(database);
-     await set(child(dbRef, "ABCD" + "/members/" + username), {
+     await update(child(dbRef, "ABCD" + "/members/" + username), {
          access_token: access_token,
          refresh_token: refresh_token
      });
@@ -172,6 +168,30 @@
              });
  }
 
+ async function accessCodeExists(code) {
+     const dbRef = ref(database);
+     let snapshot = await get(child(dbRef, code));
+     return snapshot.exists();
+ }
+
+ async function addToGroup(code, username) {
+     const dbRef = ref(database);
+     let snapshot = await get(child(dbRef, code + "/members/"));
+     if (!snapshot.exists()) {
+         await update(child(dbRef, "/"), {
+             [code]: {
+                 members: {
+                     [username]: { access_token: "invalid" }
+                 }
+             }
+         });
+     } else {
+         await update(child(dbRef, code + "/members/"), {
+             [username]: { access_token: "invalid" }
+         });
+     }
+ }
+
  // Returns array of songs
  async function getMyInfo(code, username) {
      let spotifyApi = await createSpotifyAPIObject(code, username);
@@ -189,6 +209,7 @@
  function obtain_results(success, fail) {
      mySpotifyApi.getMe().then(function(data) {
          results['display_name'] = data.body['display_name'];
+         results['username'] = data.body.id;
          results['type'] = data.body['type'];
          console.log("Done.");
          success(results);
@@ -222,6 +243,7 @@
              mySpotifyApi.setAccessToken(data.body['access_token']);
              mySpotifyApi.setRefreshToken(data.body['refresh_token']);
              await updateTokens(data.body['access_token'], data.body['refresh_token']);
+             await addToGroup("WXYZ", "NEW_USER")
              obtain_results(
                  function() {
                      results['access_token'] = data.body['access_token'];
