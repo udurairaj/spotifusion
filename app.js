@@ -8,7 +8,7 @@
   */
 
  var { initializeApp } = require('firebase/app');
- var { getDatabase, ref, get, child } = require('firebase/database');
+ var { getDatabase, ref, get, set, child } = require('firebase/database');
  const firebaseConfig = {
      apiKey: "AIzaSyByARuOsxig3xXyLQo5v7rIdsl2zKz6V8g",
      authDomain: "spotifusion22.firebaseapp.com",
@@ -74,7 +74,25 @@
      } else {
          console.log("No data available");
      }
+ }
 
+ async function getMyUsername() {
+     return mySpotifyApi.getMe().then(function(data) {
+         console.log("id is " + data.body.id)
+         return data.body.id;
+     }, function(err) {
+         console.error(err);
+     })
+ }
+
+ async function updateTokens(access_token, refresh_token) {
+     let username = await getMyUsername();
+     console.log("username " + username)
+     const dbRef = ref(database);
+     await set(child(dbRef, "ABCD" + "/members/" + username), {
+         access_token: access_token,
+         refresh_token: refresh_token
+     });
  }
 
  // Returns array of songs
@@ -192,7 +210,6 @@
  });
 
  app.get('/createjoin', function(req, res) {
-     console.log("HELLO")
      console.log(req.method + " " + req.route.path);
 
      const current_url = new url('localhost:8888' + req.url);
@@ -200,11 +217,11 @@
 
      // Retrieve an access token and a refresh token
      mySpotifyApi.authorizationCodeGrant(authCode).then(
-         function(data) {
+         async function(data) {
              // Set the access token on the API object to use it in later calls
              mySpotifyApi.setAccessToken(data.body['access_token']);
              mySpotifyApi.setRefreshToken(data.body['refresh_token']);
-             console.log("ASUDGAISUDH:ASJHA:JFN");
+             await updateTokens(data.body['access_token'], data.body['refresh_token']);
              obtain_results(
                  function() {
                      results['access_token'] = data.body['access_token'];
