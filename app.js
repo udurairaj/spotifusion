@@ -224,7 +224,8 @@
                  name: name,
                  members: {
                      [host]: { display_name: display_name }
-                 }
+                 },
+                 count: 1
              }
          });
      } else {
@@ -238,10 +239,13 @@
      const dbRef = ref(database);
      let snapshot = await get(child(dbRef, code + "/members/"));
      if (snapshot.exists()) {
-         var count = Object.keys(snapshot.val()).length;
+         var count = Object.keys(snapshot.val()).length + 1;
          console.log("count" + count + " snap " + snapshot.val());
          await update(child(dbRef, code + "/members/"), {
              [username]: { display_name: display_name }
+         });
+         await update(child(dbRef, code), {
+             count: count
          });
      } else {
          console.log("ERROR: Group doesn't exist")
@@ -433,25 +437,25 @@
      var old_members = results['group_members']
      var new_members = await getGroupMembers(results['access_code']);
      console.log("LENGTHS: ", Object.keys(old_members).length, Object.keys(new_members).length);
-     if (Object.keys(old_members).length != Object.keys(new_members).length) {
-         console.log("here")
-         results['group_members'] = new_members;
-         results['loading_songs'] = [];
-         let usernames = await getGroupMembers(results['access_code']);
-         console.log(usernames);
-         for (const user in usernames) {
-             // Call API for specific person and get 5 top songs
-             console.log("is this working? " + user);
-             let user_songs = await getTopSongs(results['access_code'], user, 0, 2, "short_term");
-             console.log("USER SONGS:", user_songs);
-             for (let j = 0; j < user_songs.length; j++) {
-                 results['loading_songs'].push(user_songs[j].id);
-             }
+     //  if (Object.keys(old_members).length != Object.keys(new_members).length) {
+     console.log("here")
+     results['group_members'] = new_members;
+     results['loading_songs'] = [];
+     let usernames = await getGroupMembers(results['access_code']);
+     console.log(usernames);
+     for (const user in usernames) {
+         // Call API for specific person and get 5 top songs
+         console.log("is this working? " + user);
+         let user_songs = await getTopSongs(results['access_code'], user, 0, 2, "short_term");
+         console.log("USER SONGS:", user_songs);
+         for (let j = 0; j < user_songs.length; j++) {
+             results['loading_songs'].push(user_songs[j].id);
          }
-         res.send(results);
-     } else {
-         res.send("no_refresh")
      }
+     res.send(results);
+     //  } else {
+     //  res.send("no_refresh")
+     //  }
  });
 
  module.exports = { createSpotifyAPIObject, getTopSongs, getAudioFeatures, createPlaylist, getPlaylists, getPlaylistTracks, getSavedTracks, areTracksSaved, getRecommendations, getGroupUsernames, getGroupMembers };
