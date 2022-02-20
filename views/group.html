@@ -21,10 +21,10 @@
 
     <div class="container-fluid outer">
         <div id="group" class="pe-3 ps-3">
-            <h1 id="name-of-group" class="display-1 pt-5">group name</h1>
+            <strong><h1 id="name-of-group" class="display-1 pt-5">group name</h1></strong>
         </div>
         <div id="pin" class="pe-3 ps-3">
-            <h1 class="display-2">access code: <span id="access-code" class="spotify">....</span></h1>
+            <h1 class="display-2 text-med">access code: <span id="access-code" class="spotify">....</span></h1>
         </div>
         <div id="users-joined" class="center-box mt-5 p-2">
             <h1 id="whos-in" class="display-2">who's in?</h1>
@@ -36,7 +36,7 @@
             </div>
         </div>
         <div class="mt-5">
-            <form method="GET" action="loading.html">
+            <form method="GET" action="/loading">
                 <label for="time" class="me-3 fs-3">playlist length:</label>
                 <select id="time" class="p-2 fs-3" name="time">
 				  <option value="0">thirty minutes</option>
@@ -59,10 +59,26 @@
     </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
     <script type="text/javascript">
+
+        let title = document.querySelector("#name-of-group").innerHTML;
+        if (title.length < 10) {
+            console.log("greater than 10")
+            document.querySelector("#name-of-group").style.fontSize = "100px";
+        }
+        else if (title.length < 20) {
+            document.querySelector("#name-of-group").style.fontSize = "75px";
+        }
+        else if (title.length < 30) {
+            document.querySelector("#name-of-group").style.fontSize = "50px";
+        }
+        else {
+            document.querySelector("#name-of-group").style.fontSize = "25px";
+        }
+
         let results = '<%= results %>'
             .replace(/&#34;/g, '"')
             .replace(/&#39;/g, "'");
-        
+
         let resultsJSON = JSON.parse(results);
         console.log(resultsJSON);
 
@@ -83,32 +99,32 @@
         }
 
         // THEN POLL AND SHOW WHO HAS JOINED
-        var intervalId3 = window.setInterval(function(){
+        var intervalId3 = window.setInterval(function() {
             $.ajax({
-                method: "GET",
-                url: "/refresh_members",
-                data: {},
-                async: true
-            })
-            .done(function(res) {
-                if (res != "no_refresh") {
-                    userlist = res;
-                    let div = document.querySelector("#list-users");
-                    div.replaceChildren();
-                    for (const user in userlist) {
-                        let tag = document.createElement("h3");
-                        tag.classList.add("display-name");
-                        tag.innerHTML = userlist[user].display_name;
-                        div.appendChild(tag);
+                    method: "GET",
+                    url: "/refresh_members",
+                    data: {},
+                    async: true
+                })
+                .done(function(res) {
+                    if (res != "no_refresh") {
+                        userlist = res;
+                        let div = document.querySelector("#list-users");
+                        div.replaceChildren();
+                        for (const user in userlist) {
+                            let tag = document.createElement("h3");
+                            tag.classList.add("display-name");
+                            tag.innerHTML = userlist[user].display_name;
+                            div.appendChild(tag);
+                        }
                     }
-                }
-            })
-            .fail(function(res) {
-                console.log("FAILED")
-            })
+                })
+                .fail(function(res) {
+                    console.log("FAILED")
+                })
 
         }, 3000);
-        
+
 
         //ADD INPUT FOR AMOUNT OF TIME
         //EVERYBODY's IN BUTTON
