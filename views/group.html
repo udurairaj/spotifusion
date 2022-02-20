@@ -36,7 +36,7 @@
             </div>
         </div>
         <div class="mt-5">
-            <form method="GET" action="loading.html">
+            <form method="GET" action="/loading">
                 <label for="time" class="me-3 fs-3">playlist length:</label>
                 <select id="time" class="p-2 fs-3" name="time">
 				  <option value="0">thirty minutes</option>
@@ -62,7 +62,7 @@
         let results = '<%= results %>'
             .replace(/&#34;/g, '"')
             .replace(/&#39;/g, "'");
-        
+
         let resultsJSON = JSON.parse(results);
         console.log(resultsJSON);
 
@@ -83,32 +83,32 @@
         }
 
         // THEN POLL AND SHOW WHO HAS JOINED
-        var intervalId3 = window.setInterval(function(){
+        var intervalId3 = window.setInterval(function() {
             $.ajax({
-                method: "GET",
-                url: "/refresh_members",
-                data: {},
-                async: true
-            })
-            .done(function(res) {
-                if (res != "no_refresh") {
-                    userlist = res;
-                    let div = document.querySelector("#list-users");
-                    div.replaceChildren();
-                    for (const user in userlist) {
-                        let tag = document.createElement("h3");
-                        tag.classList.add("display-name");
-                        tag.innerHTML = userlist[user].display_name;
-                        div.appendChild(tag);
+                    method: "GET",
+                    url: "/refresh_members",
+                    data: {},
+                    async: true
+                })
+                .done(function(res) {
+                    if (res != "no_refresh") {
+                        userlist = res;
+                        let div = document.querySelector("#list-users");
+                        div.replaceChildren();
+                        for (const user in userlist) {
+                            let tag = document.createElement("h3");
+                            tag.classList.add("display-name");
+                            tag.innerHTML = userlist[user].display_name;
+                            div.appendChild(tag);
+                        }
                     }
-                }
-            })
-            .fail(function(res) {
-                console.log("FAILED")
-            })
+                })
+                .fail(function(res) {
+                    console.log("FAILED")
+                })
 
         }, 3000);
-        
+
 
         //ADD INPUT FOR AMOUNT OF TIME
         //EVERYBODY's IN BUTTON

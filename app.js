@@ -94,6 +94,7 @@
  }
 
  async function getGroupUsernames(code) {
+     console.log("in get group usernames")
      let members = await getGroupMembers(code);
      return Object.keys(members);
  }
@@ -256,8 +257,8 @@
  }
 
  // Returns recommendations based on seed tracks
- async function getRecommendations(seed_tracks) {
-    let spotifyApi = await createSpotifyAPIObject(code, username);
+ async function getRecommendations(code, username, seed_tracks) {
+     let spotifyApi = await createSpotifyAPIObject(code, username);
      return spotifyApi.getRecommendations({
              seed_tracks: seed_tracks
          })
@@ -379,62 +380,64 @@
  });
 
  app.get('/group', async function(req, res) {
-    console.log("GROUP LOADED");
-    console.log(req.method + " " + req.route.path);
-    if (req.query.group_name) {
-        results['access_code'] = randomString(4, "A#");
-        results['group_name'] = req.query.group_name;
-        if (!await accessCodeExists(results['access_code'])) {
-            console.log("code dne so create group");
-            await createGroup(results['access_code'], results['group_name'], results['username'], results['display_name']);
-            await updateTokens(results['access_code'], mySpotifyApi.getAccessToken(), mySpotifyApi.getRefreshToken());
-            results['group_members'] = await getGroupMembers(results['access_code']);
-            console.log(results['group_members']);
+     console.log("GROUP LOADED");
+     console.log(req.method + " " + req.route.path);
+     if (req.query.group_name) {
+         results['access_code'] = randomString(4, "A#");
+         results['group_name'] = req.query.group_name;
+         if (!await accessCodeExists(results['access_code'])) {
+             console.log("code dne so create group");
+             await createGroup(results['access_code'], results['group_name'], results['username'], results['display_name']);
+             await updateTokens(results['access_code'], mySpotifyApi.getAccessToken(), mySpotifyApi.getRefreshToken());
+             results['group_members'] = await getGroupMembers(results['access_code']);
+             console.log(results['group_members']);
 
-        }
-        else {
-            console.log("ERROR: group dne");
-            // SHOW ERROR MESSAGE SOMEHOW????? REDIRECT BACK TO CREATEJOIN
-        }
-    }
-    else {
-        results['access_code'] = req.query.pin1 + req.query.pin2 + req.query.pin3 + req.query.pin4;
-        console.log("join " + results['access_code']);
-        results['group_name'] = await getGroupName(results['access_code']);
-        if (!await accessCodeExists(results['access_code'])) {
-            console.log("ERROR: access code dne");
-            // SHOW ERROR MESSAGE SOMEHOW????? REDIRECT BACK TO CREATEJOIN
-        }
-        else {
-            console.log("group found in db");
-            await addToGroup(results['access_code'], results['username'], results['display_name']);
-            await updateTokens(results['access_code'], mySpotifyApi.getAccessToken(), mySpotifyApi.getRefreshToken());
-            results['group_members'] = await getGroupMembers(results['access_code']);
-            console.log(results['group_members']);
-        }
-    }
-    console.log(results['access_code']);
-    console.log(results['group_name']);
-    res.render('group.html', { results: JSON.stringify(results) });
+         } else {
+             console.log("ERROR: group dne");
+             // SHOW ERROR MESSAGE SOMEHOW????? REDIRECT BACK TO CREATEJOIN
+         }
+     } else {
+         results['access_code'] = req.query.pin1 + req.query.pin2 + req.query.pin3 + req.query.pin4;
+         console.log("join " + results['access_code']);
+         results['group_name'] = await getGroupName(results['access_code']);
+         if (!await accessCodeExists(results['access_code'])) {
+             console.log("ERROR: access code dne");
+             // SHOW ERROR MESSAGE SOMEHOW????? REDIRECT BACK TO CREATEJOIN
+         } else {
+             console.log("group found in db");
+             await addToGroup(results['access_code'], results['username'], results['display_name']);
+             await updateTokens(results['access_code'], mySpotifyApi.getAccessToken(), mySpotifyApi.getRefreshToken());
+             results['group_members'] = await getGroupMembers(results['access_code']);
+             console.log(results['group_members']);
+         }
+     }
+     console.log(results['access_code']);
+     console.log(results['group_name']);
+     res.render('group.html', { results: JSON.stringify(results) });
  });
 
  app.get('/refresh_members', async function(req, res) {
-    console.log(req.method + " " + req.route.path);
-    let old_members = results['group_members']
-    results['group_members'] = await getGroupMembers(results['access_code']);
-    if (Object.keys(old_members).length != Object.keys(results['group_members']).length) {
-        res.send(results['group_members']);
-    } else {
-        res.send("no_refresh")
-    }
+     console.log(req.method + " " + req.route.path);
+     let old_members = results['group_members']
+     results['group_members'] = await getGroupMembers(results['access_code']);
+     if (Object.keys(old_members).length != Object.keys(results['group_members']).length) {
+         res.send(results['group_members']);
+     } else {
+         res.send("no_refresh")
+     }
  });
 
- app.get('loading.html', function(req, res) {
-     console.log("PPSTY POSTY");
+ module.exports = { createSpotifyAPIObject, getTopSongs, getAudioFeatures, createPlaylist, getPlaylists, getPlaylistTracks, getSavedTracks, areTracksSaved, getRecommendations, getGroupUsernames, getGroupMembers };
+
+ var { generatePlaylist } = require('./algorithm.js')
+
+ app.get('/loading', async function(req, res) {
+     console.log(req.method + " " + req.route.path);
+     let playlist = await generatePlaylist('ABCD');
+     console.log("playlist is " + playlist);
+     res.redirect('final.html');
  });
 
 
  console.log('Listening on 8888');
  app.listen(8888);
-
- module.exports = { createSpotifyAPIObject, getTopSongs, getAudioFeatures, createPlaylist, getPlaylists, getPlaylistTracks, getSavedTracks, areTracksSaved };
