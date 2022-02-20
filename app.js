@@ -432,6 +432,7 @@
  app.get('/refresh_members', async function(req, res) {
     let old_members = results['group_members']
     results['group_members'] = await getGroupMembers(results['access_code']);
+    console.log("LENGTH:", Object.keys(old_members).length);
     if (Object.keys(old_members).length != Object.keys(results['group_members']).length) {
         results['loading_songs'] = [];
         let usernames = await getGroupMembers(results['access_code']);
