@@ -5,7 +5,7 @@
     "version": "0.0.2",
     "start": "node app.js",
     "engines": {
-        "node": "10.x"
+        "node": "12.x"
     },
     "dependencies": {
         "@firebase/database": "^0.12.5",
