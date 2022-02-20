@@ -73,6 +73,26 @@ const { read, access } = require('fs');
      }
  }
 
+ async function getGroupName(code) {
+     const dbRef = ref(database);
+     let snapshot = await get(child(dbRef, code + "/name"));
+     if (snapshot.exists()) {
+         return snapshot.val();
+     } else {
+         console.log("Group doesn't exist in database");
+     }
+ }
+
+ async function getGroupMembers(code) {
+     const dbRef = ref(database);
+     let snapshot = await get(child(dbRef, code + "/members"));
+     if (snapshot.exists()) {
+         return snapshot.val();
+     } else {
+         console.log("Group doesn't exist in database");
+     }
+ }
+
  async function getMyUsername() {
      return mySpotifyApi.getMe().then(function(data) {
          console.log("id is " + data.body.id)
@@ -130,31 +150,31 @@ const { read, access } = require('fs');
  }
 
  async function addToPlaylist(code, username, id, trackURIs) {
-    let spotifyApi = await createSpotifyAPIObject(code, username);
+     let spotifyApi = await createSpotifyAPIObject(code, username);
      //console.log("ID:", id);
-      return spotifyApi.addTracksToPlaylist(id, trackURIs)
-        .then(function(data) {
-            //console.log('Added tracks to playlist!');
-            return data;
-        }, function(err) {
-            console.log('Something went wrong!', err);
-        });
-}
+     return spotifyApi.addTracksToPlaylist(id, trackURIs)
+         .then(function(data) {
+             //console.log('Added tracks to playlist!');
+             return data;
+         }, function(err) {
+             console.log('Something went wrong!', err);
+         });
+ }
 
  async function createPlaylist(code, username, title, description, trackURIs) {
-    let spotifyApi = await createSpotifyAPIObject(code, username);
+     let spotifyApi = await createSpotifyAPIObject(code, username);
 
-    return spotifyApi.createPlaylist(title, { 'description': description, 'public': true })
-        .then(function(data) {
-            for (let i = 0; i < trackURIs.length / 100; i++) {
-              addToPlaylist(code, username, data.body.id, trackURIs.slice(100 * i, 100 * (i + 1)));
-            }
-            return data.body.id;
-        }, function(err) {
-            console.log('Something went wrong!', err);
-        });
+     return spotifyApi.createPlaylist(title, { 'description': description, 'public': true })
+         .then(function(data) {
+             for (let i = 0; i < trackURIs.length / 100; i++) {
+                 addToPlaylist(code, username, data.body.id, trackURIs.slice(100 * i, 100 * (i + 1)));
+             }
+             return data.body.id;
+         }, function(err) {
+             console.log('Something went wrong!', err);
+         });
 
-}
+ }
 
  async function getPlaylists(code, username, offset, length) {
      let spotifyApi = await createSpotifyAPIObject(code, username);
@@ -195,7 +215,7 @@ const { read, access } = require('fs');
              [code]: {
                  name: name,
                  members: {
-                     [host]: { access_token: "invalid" }
+                     [host]: { access_token: "invalid", refresh_token: "invalid" }
                  }
              }
          });
@@ -244,15 +264,15 @@ const { read, access } = require('fs');
  }
 
  function randomString(length, chars) {
-    var mask = '';
-    if (chars.indexOf('a') > -1) mask += 'abcdefghijklmnopqrstuvwxyz';
-    if (chars.indexOf('A') > -1) mask += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    if (chars.indexOf('#') > -1) mask += '0123456789';
-    if (chars.indexOf('!') > -1) mask += '~`!@#$%^&*()_+-={}[]:";\'<>?,./|\\';
-    var result = '';
-    for (var i = length; i > 0; --i) result += mask[Math.floor(Math.random() * mask.length)];
-    return result;
-}
+     var mask = '';
+     if (chars.indexOf('a') > -1) mask += 'abcdefghijklmnopqrstuvwxyz';
+     if (chars.indexOf('A') > -1) mask += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+     if (chars.indexOf('#') > -1) mask += '0123456789';
+     if (chars.indexOf('!') > -1) mask += '~`!@#$%^&*()_+-={}[]:";\'<>?,./|\\';
+     var result = '';
+     for (var i = length; i > 0; --i) result += mask[Math.floor(Math.random() * mask.length)];
+     return result;
+ }
 
  let results = {};
 
@@ -312,6 +332,7 @@ const { read, access } = require('fs');
                      obtain_results(
                          function() {
                              results['access_token'] = data.body['access_token'];
+                             results['refresh_token'] = data.body['refresh_token'];
                              res.render('createjoin.html', { results: JSON.stringify(results) });
                          },
                          function() { console.log("ERROR ERROR ERROR") });
@@ -329,13 +350,13 @@ const { read, access } = require('fs');
  app.get('/group', async function(req, res) {
     console.log("GROUP LOADED");
     console.log(req.method + " " + req.route.path);
-    if (req.query.group_name == "") {
+    // if (req.query.group_name == "") {
         access_code = randomString(4, "A#");
-    }
-    else {
-        access_code = req.query.pin1 + req.query.pin2 + req.query.pin3 + req.query.pin4;
-        console.log("join" + access_code);
-    }
+    // }
+    // else {
+        // access_code = req.query.pin1 + req.query.pin2 + req.query.pin3 + req.query.pin4;
+        // console.log("join" + access_code);
+    // }
     results['access_code'] = access_code;
     results['group_name'] = req.query.group_name;
     console.log(results['access_code']);

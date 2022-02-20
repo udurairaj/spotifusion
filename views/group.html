@@ -80,7 +80,7 @@
         } else if (group_name) {
             document.querySelector("#name-of-group").innerHTML = group_name;
             if (!freeze_code) {
-                access_code = '1234';
+                access_code = results['access_code'];
                 freeze_code = 1;
             }
             document.querySelector("#access-code").innerHTML = access_code;
