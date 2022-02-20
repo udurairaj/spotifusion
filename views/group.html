@@ -125,6 +125,7 @@
 
         $("form").on("submit", function(e) {
             e.preventDefault();
+            let length = $('#time').val();
             $.ajax({
                     method: "GET",
                     url: "loading.html",
@@ -134,7 +135,7 @@
                     async: true
                 })
                 .done(function(res) {
-                    location.href = "loading.html?results=" + results;
+                    location.href = "loading.html?results=" + results + "&length=" + length;
                 })
                 .fail(function(res) {
                     console.log("FAILED")
