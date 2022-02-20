@@ -405,6 +405,8 @@
             console.log("group found in db");
             await addToGroup(results['access_code'], results['username']);
             await updateTokens(results['access_code'], mySpotifyApi.getAccessToken(), mySpotifyApi.getRefreshToken());
+            results['group_members'] = await getGroupMembers(results['access_code']);
+            console.log(results['group_members']);
         }
     }
     console.log(results['access_code']);
