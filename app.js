@@ -302,6 +302,18 @@
 
  }
 
+ async function followPlaylist(code, username, playlistID) {
+     let spotifyApi = await createSpotifyAPIObject(code, username);
+     return spotifyApi.followPlaylist(playlistID,
+        {
+            'public' : true
+        }).then(function(data) {
+            return data;
+        }, function(err) {
+            console.log("Something went wrong!", err);
+        });
+ }
+
  function randomString(length, chars) {
      var mask = '';
      if (chars.indexOf('a') > -1) mask += 'abcdefghijklmnpqrstuvwxyz';
@@ -458,7 +470,7 @@
      //  }
  });
 
- module.exports = { createSpotifyAPIObject, getTopSongs, getAudioFeatures, createPlaylist, getPlaylists, getPlaylistTracks, getSavedTracks, areTracksSaved, getRecommendations, getGroupUsernames, getGroupMembers };
+ module.exports = { createSpotifyAPIObject, getTopSongs, getAudioFeatures, createPlaylist, getPlaylists, getPlaylistTracks, getSavedTracks, areTracksSaved, getRecommendations, getGroupUsernames, getGroupMembers, followPlaylist };
 
  var { generatePlaylist } = require('./algorithm.js')
 
