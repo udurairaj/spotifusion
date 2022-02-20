@@ -31,7 +31,7 @@
  var client_id = 'd6cc8aeb975e401b9a736b0a64ae9f48'; // Your client id
  var client_secret = 'aad2cb7f1c8d41c396b4f9c28ccfed66'; // Your secret
  var redirect_uri = 'http://localhost:8888/createjoin/'; // Your redirect uri
- var scopes = ['user-read-private', 'user-read-email', 'user-top-read', 'playlist-modify-public', 'playlist-read-collaborative'],
+ var scopes = ['user-read-private', 'user-read-email', 'user-top-read', 'playlist-modify-public', 'playlist-read-collaborative', 'playlist-read-private', 'user-library-read'],
      state = 'spotify_auth_state';
  var mySpotifyApi = new SpotifyWebApi({
      redirectUri: redirect_uri,
@@ -255,11 +255,35 @@
          });
  }
 
- // seed_tracks
+ // Returns recommendations based on seed tracks
  async function getRecommendations(seed_tracks) {
      return mySpotifyApi.getRecommendations({
              seed_tracks: seed_tracks
          })
+         .then(function(data) {
+             return data.body;
+         }, function(err) {
+             console.log("Something went wrong!", err);
+         });
+
+ }
+
+ // Returns user's saved tracks
+ async function getSavedTracks(code, username, offset) {
+     let spotifyApi = await createSpotifyAPIObject(code, username);
+     return spotifyApi.getMySavedTracks({ limit: 50, offset: offset })
+         .then(function(data) {
+             return data.body;
+         }, function(err) {
+             console.log("Something went wrong!", err);
+         });
+
+ }
+ // Checks if each track in inputted list is in the user's saved tracks 
+ // Returns array of booleans (each element corresponds to the respective track in inputted tracks list)
+ async function areTracksSaved(code, username, tracks) {
+     let spotifyApi = await createSpotifyAPIObject(code, username);
+     return spotifyApi.containsMySavedTracks(tracks)
          .then(function(data) {
              return data.body;
          }, function(err) {
