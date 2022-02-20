@@ -1,4 +1,4 @@
-var { getTopSongs, getAudioFeatures, getPlaylists, getPlaylistTracks, createPlaylist, areTracksSaved, getSavedTracks, getRecommendations, getGroupUsernames, getGroupMembers } = require("./app.js");
+var { getTopSongs, getAudioFeatures, getPlaylists, getPlaylistTracks, createPlaylist, areTracksSaved, getSavedTracks, getRecommendations, getGroupUsernames, getGroupMembers, followPlaylist } = require("./app.js");
 // Temporary test variables
  
 // let list1 = ["1", "2", "3"];
