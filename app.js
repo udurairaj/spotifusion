@@ -463,9 +463,8 @@
  var { generatePlaylist } = require('./algorithm.js')
 
  app.get('/generate', async function(req, res) {
-     console.log(req.method + " " + req.route.path);
-     console.log("generating playlist for " + results['access_code'])
-     let playlist = await generatePlaylist(results['access_code'], results['group_name']);
+     let length = req.query.length;
+     let playlist = await generatePlaylist(results['access_code'], results['group_name'], parseInt(length));
      if (playlist) {
          res.send(playlist)
      } else {

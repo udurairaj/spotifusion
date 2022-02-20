@@ -1,34 +1,34 @@
 var { getTopSongs, getAudioFeatures, getPlaylists, getPlaylistTracks, createPlaylist, areTracksSaved, getSavedTracks, getRecommendations, getGroupUsernames, getGroupMembers } = require("./app.js");
 // Temporary test variables
- 
+
 // let list1 = ["1", "2", "3"];
 // let list2 = ["2", "3", "4"];
 // let list3 = ["3", "4", "5"];
- 
+
 // let users_lists = [list1, list2, list3];
- 
+
 let playlist_lengths = [1800000, 3600000, 7200000, 10800000, 14400000, 18000000, 21600000, 25200000, 28800000, 32400000, 36000000, 39600000, 43200000];
 let playlist_length = playlist_lengths[4];
- 
+
 let users = [];
 let range = ["short_term", "medium_term", "long_term"]
 let code = "INVALID"
 let group_name = ""
 let description = ""
- 
+
 // End test variables
- 
+
 // Global variables
- 
+
 let song_map = new Map();
 let song_set = new Set();
 let playlist_set = new Set();
- 
+
 let num_users = users.length;
 let threshold = num_users / 2;
- 
+
 // End global variables
- 
+
 // Function that takes in list of lists of users' songs and adds them to map and set
 // Optional threshold_parameter if this is beyond the first iteration; on the first iteration
 // threshold defaults to half the number of users. The number of users is a global variable.
@@ -64,11 +64,11 @@ async function CheckSets(list, liked) {
             await CheckSaved(curr_list, i);
         }
     }
- 
+
     // Check if new set meets length requirement
     return await CheckLength();
 }
- 
+
 async function Recalculate() {
     for (var [key, value] of song_map.entries()) {
         if (value.length > threshold) {
@@ -77,7 +77,7 @@ async function Recalculate() {
     }
     return await CheckLength();
 }
- 
+
 async function CheckSaved(list, user) {
     for (let i = 0; i < num_users; i++) {
         if (i != user) {
@@ -104,7 +104,7 @@ async function CheckSaved(list, user) {
         }
     }
 }
- 
+
 async function CheckLength() {
     let total_time = 0;
     let long_enough = false;
@@ -134,7 +134,7 @@ async function CheckLength() {
     }
     return long_enough;
 }
- 
+
 // Get ID list from set of IDs
 function GetIDList() {
     let song_param = [];
@@ -144,7 +144,7 @@ function GetIDList() {
     //console.log(song_string);
     return song_param;
 }
- 
+
 // Use API data to make array of song IDs for each user
 async function GetSongList(iteration) {
     let users_song_lists = [];
@@ -162,7 +162,7 @@ async function GetSongList(iteration) {
     //console.log("SONG LIST:", users_song_lists);
     return users_song_lists;
 }
- 
+
 async function GetPlaylistListList() {
     let playlist_list_list = [];
     for (let i = 0; i < num_users; i++) {
@@ -187,7 +187,7 @@ async function GetPlaylistListList() {
     // console.log(playlist_list_list.length);
     return playlist_list_list;
 }
- 
+
 function getIDs(tracks) {
     let id_list = [];
     for (let i = 0; i < tracks.length; i++) {
@@ -195,7 +195,7 @@ function getIDs(tracks) {
     }
     return id_list;
 }
- 
+
 function GetURIs() {
     let URIs = [];
     for (let song of playlist_set) {
@@ -203,7 +203,7 @@ function GetURIs() {
     }
     return URIs;
 }
- 
+
 function GetIDString(list) {
     let IDs = "";
     for (let i = 0; i < list.length - 1; i++) {
@@ -213,7 +213,7 @@ function GetIDString(list) {
     IDs += list[list.length];
     return IDs;
 }
- 
+
 async function MainLoop() {
     let finished = false;
     // Go through top 50 long, medium, short term songs
@@ -307,19 +307,20 @@ async function MainLoop() {
         finished = await CheckLength();
         offset += 5;
     }
- 
+
     //console.log("SET:", song_set);
     // console.log("MAP:", song_map);
     let playlist = await createPlaylist(code, users[1], group_name, description, GetURIs());
     console.log("DONE");
     return playlist;
 }
- 
+
 // MainLoop();
- 
-async function generatePlaylist(access_code, group) {
+
+async function generatePlaylist(access_code, group, length) {
     code = access_code;
     group_name = group;
+    playlist_length = playlist_lengths[length];
     let members = await getGroupMembers(code);
     users = Object.keys(members);
     num_users = users.length;
@@ -327,8 +328,5 @@ async function generatePlaylist(access_code, group) {
     console.log("generating playlist for " + access_code);
     return await MainLoop();
 }
- 
-module.exports = { generatePlaylist };
- 
-// get list of usernames with code
 
+module.exports = { generatePlaylist };
