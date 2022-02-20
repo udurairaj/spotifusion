@@ -257,7 +257,8 @@
 
  // Returns recommendations based on seed tracks
  async function getRecommendations(seed_tracks) {
-     return mySpotifyApi.getRecommendations({
+    let spotifyApi = await createSpotifyAPIObject(code, username);
+     return spotifyApi.getRecommendations({
              seed_tracks: seed_tracks
          })
          .then(function(data) {
@@ -389,6 +390,7 @@
             await updateTokens(results['access_code'], mySpotifyApi.getAccessToken(), mySpotifyApi.getRefreshToken());
             results['group_members'] = await getGroupMembers(results['access_code']);
             console.log(results['group_members']);
+
         }
         else {
             console.log("ERROR: group dne");
@@ -416,6 +418,17 @@
     res.render('group.html', { results: JSON.stringify(results) });
  });
 
+ app.get('/refresh_members', async function(req, res) {
+    console.log(req.method + " " + req.route.path);
+    let old_members = results['group_members']
+    results['group_members'] = await getGroupMembers(results['access_code']);
+    if (Object.keys(old_members).length != Object.keys(results['group_members']).length) {
+        res.send(results['group_members']);
+    } else {
+        res.send("no_refresh")
+    }
+ });
+
  app.get('loading.html', function(req, res) {
      console.log("PPSTY POSTY");
  });
@@ -424,4 +437,4 @@
  console.log('Listening on 8888');
  app.listen(8888);
 
- module.exports = { createSpotifyAPIObject, getTopSongs, getAudioFeatures, createPlaylist, getPlaylists, getPlaylistTracks };
+ module.exports = { createSpotifyAPIObject, getTopSongs, getAudioFeatures, createPlaylist, getPlaylists, getPlaylistTracks, getSavedTracks, areTracksSaved };

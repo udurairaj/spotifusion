@@ -57,13 +57,13 @@
             </form>
         </div>
     </div>
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
     <script type="text/javascript">
-        const results = '<%= results %>'
+        let results = '<%= results %>'
             .replace(/&#34;/g, '"')
             .replace(/&#39;/g, "'");
-
-        const resultsJSON = JSON.parse(results);
+        
+        let resultsJSON = JSON.parse(results);
         console.log(resultsJSON);
 
         console.log("IN GROUP.HTML");
@@ -72,19 +72,42 @@
         document.querySelector("#access-code").innerHTML = resultsJSON['access_code'];
         document.querySelector("#name-of-group").innerHTML = resultsJSON['group_name'];
 
-        //THEN POLL AND SHOW WHO HAS JOINED
+        let userlist = resultsJSON['group_members'];
+        let div = document.querySelector("#list-users");
+        div.replaceChildren();
+        for (const user in userlist) {
+            let tag = document.createElement("h3");
+            tag.classList.add("display-name");
+            tag.innerHTML = userlist[user].display_name;
+            div.appendChild(tag);
+        }
 
-        var intervalId = window.setInterval(function(){
-            let userlist = resultsJSON['group_members'];
-            let div = document.querySelector("#list-users");
-            div.replaceChildren();
-            for (const user in userlist) {
-                let tag = document.createElement("h3");
-                tag.classList.add("display-name");
-                tag.innerHTML = userlist[user].display_name;
-                div.appendChild(tag);
-            }
-        }, 1000);
+        // THEN POLL AND SHOW WHO HAS JOINED
+        var intervalId3 = window.setInterval(function(){
+            $.ajax({
+                method: "GET",
+                url: "/refresh_members",
+                data: {},
+                async: true
+            })
+            .done(function(res) {
+                if (res != "no_refresh") {
+                    userlist = res;
+                    let div = document.querySelector("#list-users");
+                    div.replaceChildren();
+                    for (const user in userlist) {
+                        let tag = document.createElement("h3");
+                        tag.classList.add("display-name");
+                        tag.innerHTML = userlist[user].display_name;
+                        div.appendChild(tag);
+                    }
+                }
+            })
+            .fail(function(res) {
+                console.log("FAILED")
+            })
+
+        }, 3000);
         
 
         //ADD INPUT FOR AMOUNT OF TIME
