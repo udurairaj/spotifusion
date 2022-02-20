@@ -72,6 +72,26 @@
      }
  }
 
+ async function getGroupName(code) {
+     const dbRef = ref(database);
+     let snapshot = await get(child(dbRef, code + "/name"));
+     if (snapshot.exists()) {
+         return snapshot.val();
+     } else {
+         console.log("Group doesn't exist in database");
+     }
+ }
+
+ async function getGroupMembers(code) {
+     const dbRef = ref(database);
+     let snapshot = await get(child(dbRef, code + "/members"));
+     if (snapshot.exists()) {
+         return snapshot.val();
+     } else {
+         console.log("Group doesn't exist in database");
+     }
+ }
+
  async function getMyUsername() {
      return mySpotifyApi.getMe().then(function(data) {
          console.log("id is " + data.body.id)
@@ -90,14 +110,14 @@
      })
  }
 
- async function updateTokens(access_token, refresh_token) {
+ async function updateTokens(code, access_token, refresh_token) {
      let username = await getMyUsername();
      console.log("username " + username)
      if (username == undefined) {
          username = await getMyEmail();
      }
      const dbRef = ref(database);
-     await update(child(dbRef, "ABCD" + "/members/" + username), {
+     await update(child(dbRef, code + "/members/" + username), {
          access_token: access_token,
          refresh_token: refresh_token
      });
@@ -129,31 +149,31 @@
  }
 
  async function addToPlaylist(code, username, id, trackURIs) {
-    let spotifyApi = await createSpotifyAPIObject(code, username);
+     let spotifyApi = await createSpotifyAPIObject(code, username);
      //console.log("ID:", id);
-      return spotifyApi.addTracksToPlaylist(id, trackURIs)
-        .then(function(data) {
-            //console.log('Added tracks to playlist!');
-            return data;
-        }, function(err) {
-            console.log('Something went wrong!', err);
-        });
-}
+     return spotifyApi.addTracksToPlaylist(id, trackURIs)
+         .then(function(data) {
+             //console.log('Added tracks to playlist!');
+             return data;
+         }, function(err) {
+             console.log('Something went wrong!', err);
+         });
+ }
 
  async function createPlaylist(code, username, title, description, trackURIs) {
-    let spotifyApi = await createSpotifyAPIObject(code, username);
+     let spotifyApi = await createSpotifyAPIObject(code, username);
 
-    return spotifyApi.createPlaylist(title, { 'description': description, 'public': true })
-        .then(function(data) {
-            for (let i = 0; i < trackURIs.length / 100; i++) {
-              addToPlaylist(code, username, data.body.id, trackURIs.slice(100 * i, 100 * (i + 1)));
-            }
-            return data.body.id;
-        }, function(err) {
-            console.log('Something went wrong!', err);
-        });
+     return spotifyApi.createPlaylist(title, { 'description': description, 'public': true })
+         .then(function(data) {
+             for (let i = 0; i < trackURIs.length / 100; i++) {
+                 addToPlaylist(code, username, data.body.id, trackURIs.slice(100 * i, 100 * (i + 1)));
+             }
+             return data.body.id;
+         }, function(err) {
+             console.log('Something went wrong!', err);
+         });
 
-}
+ }
 
  async function getPlaylists(code, username, offset, length) {
      let spotifyApi = await createSpotifyAPIObject(code, username);
@@ -194,7 +214,7 @@
              [code]: {
                  name: name,
                  members: {
-                     [host]: { access_token: "invalid" }
+                     [host]: { access_token: "invalid", refresh_token: "invalid" }
                  }
              }
          });
@@ -280,7 +300,7 @@
              // Set the access token on the API object to use it in later calls
              mySpotifyApi.setAccessToken(data.body['access_token']);
              mySpotifyApi.setRefreshToken(data.body['refresh_token']);
-             await updateTokens(data.body['access_token'], data.body['refresh_token']);
+             await updateTokens("ABCD", data.body['access_token'], data.body['refresh_token']);
              obtain_results(
                  function() {
                      results['access_token'] = data.body['access_token'];
@@ -301,6 +321,7 @@
                      obtain_results(
                          function() {
                              results['access_token'] = data.body['access_token'];
+                             results['refresh_token'] = data.body['refresh_token'];
                              res.render('createjoin.html', { results: JSON.stringify(results) });
                          },
                          function() { console.log("ERROR ERROR ERROR") });
