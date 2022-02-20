@@ -97,7 +97,6 @@
  }
 
  async function getGroupUsernames(code) {
-     console.log("in get group usernames")
      let members = await getGroupMembers(code);
      return Object.keys(members);
  }
@@ -225,7 +224,8 @@
                  name: name,
                  members: {
                      [host]: { display_name: display_name }
-                 }
+                 },
+                 count: 1
              }
          });
      } else {
@@ -236,15 +236,20 @@
 
  // Adds user to group
  async function addToGroup(code, username, display_name) {
-    const dbRef = ref(database);
-    let snapshot = await get(child(dbRef, code + "/members/"));
-    if (snapshot.exists()) {
-        await update(child(dbRef, code + "/members/"), {
-            [username]: { display_name: display_name }
-        });
-    } else {
-        console.log("ERROR: Group doesn't exist")
-    }
+     const dbRef = ref(database);
+     let snapshot = await get(child(dbRef, code + "/members/"));
+     if (snapshot.exists()) {
+         var count = Object.keys(snapshot.val()).length + 1;
+         console.log("count" + count + " snap " + snapshot.val());
+         await update(child(dbRef, code + "/members/"), {
+             [username]: { display_name: display_name }
+         });
+         await update(child(dbRef, code), {
+             count: count
+         });
+     } else {
+         console.log("ERROR: Group doesn't exist")
+     }
  }
 
  // Returns array of songs
@@ -337,13 +342,10 @@
 
      const current_url = new url('https://spotifusion.herokuapp.com' + req.url);
      const authCode = current_url.searchParams.get('code');
-     console.log("URL:", current_url);
-     console.log("AUTH CODE:", authCode);
 
      // Retrieve an access token and a refresh token
      mySpotifyApi.authorizationCodeGrant(authCode).then(
          async function(data) {
-             console.log("obtaining");
              // Set the access token on the API object to use it in later calls
              mySpotifyApi.setAccessToken(data.body['access_token']);
              mySpotifyApi.setRefreshToken(data.body['refresh_token']);
@@ -393,9 +395,7 @@
              results['access_code'] = randomString(4, "a#");
          }
          console.log("code dne so create group");
-         console.log(results);
          await createGroup(results['access_code'], results['group_name'], results['username'], results['display_name']);
-         console.log("created");
          await updateTokens(results['access_code'], mySpotifyApi.getAccessToken(), mySpotifyApi.getRefreshToken());
          results['group_members'] = await getGroupMembers(results['access_code']);
          console.log(results['group_members']);
@@ -416,55 +416,52 @@
      }
      console.log(results['access_code']);
      console.log(results['group_name']);
+
+     results['loading_songs'] = [];
+     let usernames = await getGroupMembers(results['access_code']);
+     console.log(usernames);
+     for (const user in usernames) {
+         // Call API for specific person and get 5 top songs
+         console.log("is this working? " + user);
+         let user_songs = await getTopSongs(results['access_code'], user, 0, 2, "short_term");
+         console.log("USER SONGS:", user_songs);
+         for (let j = 0; j < user_songs.length; j++) {
+             results['loading_songs'].push(user_songs[j].id);
+         }
+     }
+
      res.render('group.html', { results: JSON.stringify(results) });
  });
 
  app.get('/refresh_members', async function(req, res) {
-     let old_members = results['group_members']
-     results['group_members'] = await getGroupMembers(results['access_code']);
-     if (Object.keys(old_members).length != Object.keys(results['group_members']).length) {
-         res.send(results['group_members']);
-     } else {
-         res.send("no_refresh")
+     var old_members = results['group_members']
+     var new_members = await getGroupMembers(results['access_code']);
+     console.log("LENGTHS: ", Object.keys(old_members).length, Object.keys(new_members).length);
+     //  if (Object.keys(old_members).length != Object.keys(new_members).length) {
+     console.log("here")
+     results['group_members'] = new_members;
+     results['loading_songs'] = [];
+     let usernames = await getGroupMembers(results['access_code']);
+     console.log(usernames);
+     for (const user in usernames) {
+         // Call API for specific person and get 5 top songs
+         console.log("is this working? " + user);
+         let user_songs = await getTopSongs(results['access_code'], user, 0, 2, "short_term");
+         console.log("USER SONGS:", user_songs);
+         for (let j = 0; j < user_songs.length; j++) {
+             results['loading_songs'].push(user_songs[j].id);
+         }
      }
+     res.send(results);
+     //  } else {
+     //  res.send("no_refresh")
+     //  }
  });
 
  module.exports = { createSpotifyAPIObject, getTopSongs, getAudioFeatures, createPlaylist, getPlaylists, getPlaylistTracks, getSavedTracks, areTracksSaved, getRecommendations, getGroupUsernames, getGroupMembers };
 
  var { generatePlaylist } = require('./algorithm.js')
 
- app.get('/loading', async function(req, res) {
-     console.log(req.method + " " + req.route.path);
-     let playlist = await generatePlaylist('ABCD');
-     console.log("playlist is " + playlist);
-     res.redirect('final.html');
- });
-
- app.get('/refresh_members', async function(req, res) {
-    let old_members = results['group_members']
-    results['group_members'] = await getGroupMembers(results['access_code']);
-    if (Object.keys(old_members).length != Object.keys(results['group_members']).length) {
-        results['loading_songs'] = [];
-        let usernames = await getGroupMembers(results['access_code']);
-        console.log(usernames);
-        for (const user in usernames) {
-            // Call API for specific person and get 5 top songs
-            console.log("is this working? " + user);
-            let user_songs = await getTopSongs(results['access_code'], user, 0, 2, "short_term");
-            console.log("USER SONGS:", user_songs);
-            for (let j = 0; j < user_songs.length; j++) {
-                results['loading_songs'].push(user_songs[j].id);
-            }
-        }
-        res.send(results);
-    } else {
-        res.send("no_refresh")
-    }
- });
-
- module.exports = { createSpotifyAPIObject, getTopSongs, getAudioFeatures, createPlaylist, getPlaylists, getPlaylistTracks, getSavedTracks, areTracksSaved, getRecommendations, getGroupUsernames, getGroupMembers };
- var { generatePlaylist } = require('./algorithm.js')
- 
  app.get('/generate', async function(req, res) {
      console.log(req.method + " " + req.route.path);
      console.log("generating playlist for " + results['access_code'])

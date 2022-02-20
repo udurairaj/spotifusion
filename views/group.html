@@ -59,26 +59,22 @@
     </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
     <script type="text/javascript">
-
         let title = document.querySelector("#name-of-group").innerHTML;
         if (title.length < 10) {
             console.log("greater than 10")
             document.querySelector("#name-of-group").style.fontSize = "100px";
-        }
-        else if (title.length < 20) {
+        } else if (title.length < 20) {
             document.querySelector("#name-of-group").style.fontSize = "75px";
-        }
-        else if (title.length < 30) {
+        } else if (title.length < 30) {
             document.querySelector("#name-of-group").style.fontSize = "50px";
-        }
-        else {
+        } else {
             document.querySelector("#name-of-group").style.fontSize = "25px";
         }
 
         let results = '<%= results %>'
             .replace(/&#34;/g, '"')
             .replace(/&#39;/g, "'");
-        
+
         let resultsJSON = JSON.parse(results);
         console.log(resultsJSON);
 
@@ -99,31 +95,33 @@
         }
 
         // THEN POLL AND SHOW WHO HAS JOINED
-        var intervalId3 = window.setInterval(function(){
+        var intervalId3 = window.setInterval(function() {
             $.ajax({
-                method: "GET",
-                url: "/refresh_members",
-                data: {},
-                async: true
-            })
-            .done(function(res) {
-                if (res != "no_refresh") {
-                    userlist = res['group_members'];
-                    let div = document.querySelector("#list-users");
-                    div.replaceChildren();
-                    for (const user in userlist) {
-                        let tag = document.createElement("h3");
-                        tag.classList.add("display-name");
-                        tag.innerHTML = userlist[user].display_name;
-                        div.appendChild(tag);
+                    method: "GET",
+                    url: "/refresh_members",
+                    data: {},
+                    async: true
+                })
+                .done(function(res) {
+                    console.log("REFRESHING");
+                    console.log(res);
+                    if (res != "no_refresh") {
+                        userlist = res['group_members'];
+                        let div = document.querySelector("#list-users");
+                        div.replaceChildren();
+                        for (const user in userlist) {
+                            let tag = document.createElement("h3");
+                            tag.classList.add("display-name");
+                            tag.innerHTML = userlist[user].display_name;
+                            div.appendChild(tag);
+                        }
                     }
-                }
-            })
-            .fail(function(res) {
-                console.log("FAILED")
-            })
+                })
+                .fail(function(res) {
+                    console.log("FAILED")
+                })
 
-        }, 3000);
+        }, 5000);
 
         $("form").on("submit", function(e) {
             e.preventDefault();
@@ -141,7 +139,7 @@
                 .fail(function(res) {
                     console.log("FAILED")
                 })
- 
+
         })
     </script>
 </body>
