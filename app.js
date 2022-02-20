@@ -42,6 +42,7 @@
 
  var app = express();
  var path = require('path');
+const { read, access } = require('fs');
 
 
  app.set('port', 8888);
@@ -328,16 +329,25 @@
  app.get('/group', async function(req, res) {
     console.log("GROUP LOADED");
     console.log(req.method + " " + req.route.path);
-    access_code = randomString(4, "A#");
+    if (req.query.group_name == "") {
+        access_code = randomString(4, "A#");
+    }
+    else {
+        access_code = req.query.pin1 + req.query.pin2 + req.query.pin3 + req.query.pin4;
+        console.log("join" + access_code);
+    }
     results['access_code'] = access_code;
     results['group_name'] = req.query.group_name;
     console.log(results['access_code']);
     console.log(results['display_name']);
     console.log(results['group_name']);
     if (!await accessCodeExists(access_code)) {
-        console.log("code dne");
+        console.log("code dne so create group");
         await createGroup(results['access_code'], results['group_name'], results['display_name']);
         await updateTokens(results['access_code'], mySpotifyApi.getAccessToken(), mySpotifyApi.getRefreshToken());
+    }
+    else {
+        console.log("group found in db");
     }
     res.render('group.html', { results: JSON.stringify(results) });
  });
