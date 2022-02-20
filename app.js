@@ -295,9 +295,9 @@
 
  function randomString(length, chars) {
      var mask = '';
-     if (chars.indexOf('a') > -1) mask += 'abcdefghijklmnopqrstuvwxyz';
-     if (chars.indexOf('A') > -1) mask += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-     if (chars.indexOf('#') > -1) mask += '0123456789';
+     if (chars.indexOf('a') > -1) mask += 'abcdefghijklmnpqrstuvwxyz';
+     if (chars.indexOf('A') > -1) mask += 'ABCDEFGHIJKLMNPQRSTUVWXYZ';
+     if (chars.indexOf('#') > -1) mask += '123456789';
      if (chars.indexOf('!') > -1) mask += '~`!@#$%^&*()_+-={}[]:";\'<>?,./|\\';
      var result = '';
      for (var i = length; i > 0; --i) result += mask[Math.floor(Math.random() * mask.length)];
@@ -382,20 +382,16 @@
     console.log("GROUP LOADED");
     console.log(req.method + " " + req.route.path);
     if (req.query.group_name) {
-        results['access_code'] = randomString(4, "A#");
         results['group_name'] = req.query.group_name;
-        if (!await accessCodeExists(results['access_code'])) {
-            console.log("code dne so create group");
-            await createGroup(results['access_code'], results['group_name'], results['username'], results['display_name']);
-            await updateTokens(results['access_code'], mySpotifyApi.getAccessToken(), mySpotifyApi.getRefreshToken());
-            results['group_members'] = await getGroupMembers(results['access_code']);
-            console.log(results['group_members']);
-
+        results['access_code'] = randomString(4, "a#");
+        while (await accessCodeExists(results['access_code'])) {
+            results['access_code'] = randomString(4, "a#");
         }
-        else {
-            console.log("ERROR: group dne");
-            // SHOW ERROR MESSAGE SOMEHOW????? REDIRECT BACK TO CREATEJOIN
-        }
+        console.log("code dne so create group");
+        await createGroup(results['access_code'], results['group_name'], results['username'], results['display_name']);
+        await updateTokens(results['access_code'], mySpotifyApi.getAccessToken(), mySpotifyApi.getRefreshToken());
+        results['group_members'] = await getGroupMembers(results['access_code']);
+        console.log(results['group_members']);
     }
     else {
         results['access_code'] = req.query.pin1 + req.query.pin2 + req.query.pin3 + req.query.pin4;
@@ -419,7 +415,6 @@
  });
 
  app.get('/refresh_members', async function(req, res) {
-    console.log(req.method + " " + req.route.path);
     let old_members = results['group_members']
     results['group_members'] = await getGroupMembers(results['access_code']);
     if (Object.keys(old_members).length != Object.keys(results['group_members']).length) {

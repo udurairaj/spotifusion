@@ -21,10 +21,10 @@
 
     <div class="container-fluid outer">
         <div id="group" class="pe-3 ps-3">
-            <h1 id="name-of-group" class="display-1 pt-5">group name</h1>
+            <strong><h1 id="name-of-group" class="display-1 pt-5">group name</h1></strong>
         </div>
         <div id="pin" class="pe-3 ps-3">
-            <h1 class="display-2">access code: <span id="access-code" class="spotify">....</span></h1>
+            <h1 class="display-2 text-med">access code: <span id="access-code" class="spotify">....</span></h1>
         </div>
         <div id="users-joined" class="center-box mt-5 p-2">
             <h1 id="whos-in" class="display-2">who's in?</h1>
@@ -59,6 +59,22 @@
     </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
     <script type="text/javascript">
+
+        let title = document.querySelector("#name-of-group").innerHTML;
+        if (title.length < 10) {
+            console.log("greater than 10")
+            document.querySelector("#name-of-group").style.fontSize = "100px";
+        }
+        else if (title.length < 20) {
+            document.querySelector("#name-of-group").style.fontSize = "75px";
+        }
+        else if (title.length < 30) {
+            document.querySelector("#name-of-group").style.fontSize = "50px";
+        }
+        else {
+            document.querySelector("#name-of-group").style.fontSize = "25px";
+        }
+
         let results = '<%= results %>'
             .replace(/&#34;/g, '"')
             .replace(/&#39;/g, "'");

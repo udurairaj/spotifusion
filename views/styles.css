@@ -43,7 +43,9 @@ body {
 }
 
 #name-of-group {
-	font-size: 75px;
+	font-size: 100px;
+  margin-top: 30px;
+  border-bottom: 2px dotted #1DB954;
 }
 
 #access-code {
@@ -185,4 +187,8 @@ body {
 
 .box5{
   animation-name: quiet;
+}
+
+.text-med {
+  font-size: 40px;
 }
