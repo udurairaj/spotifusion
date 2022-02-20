@@ -385,7 +385,7 @@
         results['group_name'] = req.query.group_name;
         if (!await accessCodeExists(results['access_code'])) {
             console.log("code dne so create group");
-            await createGroup(results['access_code'], results['group_name'], results['display_name']);
+            await createGroup(results['access_code'], results['group_name'], results['username']);
             await updateTokens(results['access_code'], mySpotifyApi.getAccessToken(), mySpotifyApi.getRefreshToken());
         }
         else {
@@ -403,7 +403,7 @@
         }
         else {
             console.log("group found in db");
-            await addToGroup(results['access_code'], results['display_name']);
+            await addToGroup(results['access_code'], results['username']);
             await updateTokens(results['access_code'], mySpotifyApi.getAccessToken(), mySpotifyApi.getRefreshToken());
         }
     }
