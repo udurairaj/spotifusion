@@ -428,9 +428,9 @@
  });
 
  app.get('/refresh_members', async function(req, res) {
-     let old_members = results['group_members']
-     let new_members = await getGroupMembers(results['access_code']);
-     console.log("LENGTH:", Object.keys(old_members).length);
+     var old_members = results['group_members']
+     var new_members = await getGroupMembers(results['access_code']);
+     console.log("LENGTHS:", Object.keys(old_members).length, Object.keys(new_members).length);
      if (Object.keys(old_members).length != Object.keys(new_members).length) {
          console.log("here")
          results['group_members'] = new_members;
