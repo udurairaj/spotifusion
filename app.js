@@ -42,7 +42,7 @@
 
  var app = express();
  var path = require('path');
-const { read, access } = require('fs');
+ const { read, access } = require('fs');
 
 
  app.set('port', 8888);
@@ -91,6 +91,11 @@ const { read, access } = require('fs');
      } else {
          console.log("Group doesn't exist in database");
      }
+ }
+
+ async function getGroupUsernames(code) {
+     let members = await getGroupMembers(code);
+     return Object.keys(members);
  }
 
  async function getMyUsername() {
