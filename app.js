@@ -45,7 +45,7 @@
  const { read, access } = require('fs');
 
 
- app.set('port', (process.env.PORT || 8888));
+ app.set('port', process.env.PORT);
  app.engine('html', require('ejs').renderFile);
  app.set('view engine', 'html');
  app.use(express.static(path.join(__dirname + '/views/')));
