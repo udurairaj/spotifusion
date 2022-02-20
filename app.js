@@ -212,7 +212,7 @@
  }
 
  // Creates group in database
- async function createGroup(code, name, host) {
+ async function createGroup(code, name, host, display_name) {
      const dbRef = ref(database);
      let snapshot = await get(child(dbRef, code));
      if (!snapshot.exists()) {
@@ -220,7 +220,7 @@
              [code]: {
                  name: name,
                  members: {
-                     [host]: { access_token: "invalid", refresh_token: "invalid" }
+                     [host]: { display_name: display_name }
                  }
              }
          });
@@ -231,12 +231,12 @@
 
 
  // Adds user to group
- async function addToGroup(code, username) {
+ async function addToGroup(code, username, display_name) {
      const dbRef = ref(database);
      let snapshot = await get(child(dbRef, code + "/members/"));
      if (snapshot.exists()) {
          await update(child(dbRef, code + "/members/"), {
-             [username]: { access_token: "invalid" }
+             [username]: { display_name: display_name }
          });
      } else {
          console.log("ERROR: Group doesn't exist")
@@ -385,7 +385,7 @@
         results['group_name'] = req.query.group_name;
         if (!await accessCodeExists(results['access_code'])) {
             console.log("code dne so create group");
-            await createGroup(results['access_code'], results['group_name'], results['username']);
+            await createGroup(results['access_code'], results['group_name'], results['username'], results['display_name']);
             await updateTokens(results['access_code'], mySpotifyApi.getAccessToken(), mySpotifyApi.getRefreshToken());
         }
         else {
@@ -403,7 +403,7 @@
         }
         else {
             console.log("group found in db");
-            await addToGroup(results['access_code'], results['username']);
+            await addToGroup(results['access_code'], results['username'], results['display_name']);
             await updateTokens(results['access_code'], mySpotifyApi.getAccessToken(), mySpotifyApi.getRefreshToken());
             results['group_members'] = await getGroupMembers(results['access_code']);
             console.log(results['group_members']);
