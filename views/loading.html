@@ -39,14 +39,9 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
     <script type="text/javascript">
-<<<<<<< HEAD
-<<<<<<< HEAD
         let track_uri = "3XOHxCoPkXW0pvR6xl4f0M";
         let spotify_player_url = "https://open.spotify.com/embed/track/" + track_uri + "?utm_source=generator";
         document.querySelector("iframe").src = spotify_player_url;
-=======
-=======
->>>>>>> e1ea1c46c0b0e599858a579bc43d452393b9633f
 
         const urlParams = new URLSearchParams(window.location.search);
         let results = urlParams.get('results')
@@ -67,7 +62,6 @@
             .fail(function(res) {
                 console.log("FAILED")
             })
-<<<<<<< HEAD
 
         console.log(resultsJSON);
         console.log(resultsJSON['loading_songs']);
@@ -80,9 +74,6 @@
             document.querySelector("iframe").src = spotify_player_url;
         //}
 
->>>>>>> e1ea1c46c0b0e599858a579bc43d452393b9633f
-=======
-
         console.log(resultsJSON);
         console.log(resultsJSON['loading_songs']);
 
@@ -93,8 +84,6 @@
             let spotify_player_url = "https://open.spotify.com/embed/track/" + track_id + "?utm_source=generator";
             document.querySelector("iframe").src = spotify_player_url;
         //}
-
->>>>>>> e1ea1c46c0b0e599858a579bc43d452393b9633f
     </script>
 
 </body>
