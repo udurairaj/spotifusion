@@ -212,7 +212,7 @@
  }
 
  // Creates group in database
- async function createGroup(code, name, host) {
+ async function createGroup(code, name, host, display_name) {
      const dbRef = ref(database);
      let snapshot = await get(child(dbRef, code));
      if (!snapshot.exists()) {
@@ -220,7 +220,7 @@
              [code]: {
                  name: name,
                  members: {
-                     [host]: { access_token: "invalid", refresh_token: "invalid" }
+                     [host]: { display_name: display_name }
                  }
              }
          });
@@ -231,12 +231,12 @@
 
 
  // Adds user to group
- async function addToGroup(code, username) {
+ async function addToGroup(code, username, display_name) {
      const dbRef = ref(database);
      let snapshot = await get(child(dbRef, code + "/members/"));
      if (snapshot.exists()) {
          await update(child(dbRef, code + "/members/"), {
-             [username]: { access_token: "invalid" }
+             [username]: { display_name: display_name }
          });
      } else {
          console.log("ERROR: Group doesn't exist")
@@ -378,38 +378,35 @@
  });
 
  app.get('/group', async function(req, res) {
-    console.log("GROUP LOADED");
-    console.log(req.method + " " + req.route.path);
-    if (req.query.group_name) {
-        results['access_code'] = randomString(4, "A#");
-        results['group_name'] = req.query.group_name;
-        if (!await accessCodeExists(results['access_code'])) {
-            console.log("code dne so create group");
-            await createGroup(results['access_code'], results['group_name'], results['username']);
-            await updateTokens(results['access_code'], mySpotifyApi.getAccessToken(), mySpotifyApi.getRefreshToken());
-        }
-        else {
-            console.log("ERROR: group dne");
-            // SHOW ERROR MESSAGE SOMEHOW????? REDIRECT BACK TO CREATEJOIN
-        }
-    }
-    else {
-        results['access_code'] = req.query.pin1 + req.query.pin2 + req.query.pin3 + req.query.pin4;
-        console.log("join " + results['access_code']);
-        results['group_name'] = await getGroupName(results['access_code']);
-        if (!await accessCodeExists(results['access_code'])) {
-            console.log("ERROR: access code dne");
-            // SHOW ERROR MESSAGE SOMEHOW????? REDIRECT BACK TO CREATEJOIN
-        }
-        else {
-            console.log("group found in db");
-            await addToGroup(results['access_code'], results['username']);
-            await updateTokens(results['access_code'], mySpotifyApi.getAccessToken(), mySpotifyApi.getRefreshToken());
-        }
-    }
-    console.log(results['access_code']);
-    console.log(results['group_name']);
-    res.render('group.html', { results: JSON.stringify(results) });
+     console.log("GROUP LOADED");
+     console.log(req.method + " " + req.route.path);
+     if (req.query.group_name) {
+         results['access_code'] = randomString(4, "A#");
+         results['group_name'] = req.query.group_name;
+         if (!await accessCodeExists(results['access_code'])) {
+             console.log("code dne so create group");
+             await createGroup(results['access_code'], results['group_name'], results['username'], results['display_name']);
+             await updateTokens(results['access_code'], mySpotifyApi.getAccessToken(), mySpotifyApi.getRefreshToken());
+         } else {
+             console.log("ERROR: group dne");
+             // SHOW ERROR MESSAGE SOMEHOW????? REDIRECT BACK TO CREATEJOIN
+         }
+     } else {
+         results['access_code'] = req.query.pin1 + req.query.pin2 + req.query.pin3 + req.query.pin4;
+         console.log("join " + results['access_code']);
+         results['group_name'] = await getGroupName(results['access_code']);
+         if (!await accessCodeExists(results['access_code'])) {
+             console.log("ERROR: access code dne");
+             // SHOW ERROR MESSAGE SOMEHOW????? REDIRECT BACK TO CREATEJOIN
+         } else {
+             console.log("group found in db");
+             await addToGroup(results['access_code'], results['username'], results['display_name']);
+             await updateTokens(results['access_code'], mySpotifyApi.getAccessToken(), mySpotifyApi.getRefreshToken());
+         }
+     }
+     console.log(results['access_code']);
+     console.log(results['group_name']);
+     res.render('group.html', { results: JSON.stringify(results) });
  });
 
  app.get('loading.html', function(req, res) {
