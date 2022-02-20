@@ -107,6 +107,8 @@
                 async: true
             })
             .done(function(res) {
+                console.log("REFRESHING");
+                console.log(res);
                 if (res != "no_refresh") {
                     userlist = res['group_members'];
                     let div = document.querySelector("#list-users");
