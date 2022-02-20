@@ -78,7 +78,7 @@
         let results = '<%= results %>'
             .replace(/&#34;/g, '"')
             .replace(/&#39;/g, "'");
-
+        
         let resultsJSON = JSON.parse(results);
         console.log(resultsJSON);
 
@@ -99,7 +99,7 @@
         }
 
         // THEN POLL AND SHOW WHO HAS JOINED
-        var intervalId3 = window.setInterval(function() {
+        var intervalId3 = window.setInterval(function(){
             $.ajax({
                 method: "GET",
                 url: "/refresh_members",
@@ -119,9 +119,9 @@
                     }
                 }
             })
-                .fail(function(res) {
-                    console.log("FAILED")
-                })
+            .fail(function(res) {
+                console.log("FAILED")
+            })
 
         }, 3000);
 
