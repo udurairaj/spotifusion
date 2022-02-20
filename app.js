@@ -334,12 +334,13 @@
  app.get('/createjoin', function(req, res) {
      console.log(req.method + " " + req.route.path);
 
-     const current_url = new url(redirect_uri + req.url);
+     const current_url = new url('spotifusion.herokuapp.com/' + req.url);
      const authCode = current_url.searchParams.get('code');
 
      // Retrieve an access token and a refresh token
      mySpotifyApi.authorizationCodeGrant(authCode).then(
          async function(data) {
+             console.log("obtaining");
              // Set the access token on the API object to use it in later calls
              mySpotifyApi.setAccessToken(data.body['access_token']);
              mySpotifyApi.setRefreshToken(data.body['refresh_token']);
