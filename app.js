@@ -62,7 +62,7 @@
          const spotifyApi__ = new SpotifyWebApi({
              clientId: 'd6cc8aeb975e401b9a736b0a64ae9f48',
              clientSecret: 'aad2cb7f1c8d41c396b4f9c28ccfed66',
-             redirectUri: 'http://localhost:8888/createjoin.html'
+             redirectUri: 'http://spotifusion.herokuapp.com/createjoin.html'
          });
 
          spotifyApi__.setAccessToken(access_token);
@@ -334,7 +334,7 @@
  app.get('/createjoin', function(req, res) {
      console.log(req.method + " " + req.route.path);
 
-     const current_url = new url('localhost:8888' + req.url);
+     const current_url = new url(redirect_uri + req.url);
      const authCode = current_url.searchParams.get('code');
 
      // Retrieve an access token and a refresh token
@@ -436,4 +436,4 @@
 
 
  console.log('Listening on 8888');
- app.listen(8888);
+ app.listen(app.get('port'));
