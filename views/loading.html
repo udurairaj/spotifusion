@@ -39,9 +39,6 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
     <script type="text/javascript">
-        let track_uri = "3XOHxCoPkXW0pvR6xl4f0M";
-        let spotify_player_url = "https://open.spotify.com/embed/track/" + track_uri + "?utm_source=generator";
-        document.querySelector("iframe").src = spotify_player_url;
 
         const urlParams = new URLSearchParams(window.location.search);
         let results = urlParams.get('results')
@@ -73,7 +70,7 @@
             let spotify_player_url = "https://open.spotify.com/embed/track/" + track_id + "?utm_source=generator";
             document.querySelector("iframe").src = spotify_player_url;
         //}
-       
+
     </script>
 
 </body>
