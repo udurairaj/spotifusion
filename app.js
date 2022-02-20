@@ -312,6 +312,7 @@ const { read, access } = require('fs');
              // Set the access token on the API object to use it in later calls
              mySpotifyApi.setAccessToken(data.body['access_token']);
              mySpotifyApi.setRefreshToken(data.body['refresh_token']);
+             await updateTokens('ABCD', data.body['access_token'], data.body['refresh_token']);
              obtain_results(
                  function() {
                      results['access_token'] = data.body['access_token'];
@@ -323,12 +324,12 @@ const { read, access } = require('fs');
          function(err) {
              console.log('Something went wrong! Refreshing token now...');
              mySpotifyApi.refreshAccessToken().then(
-                 function(data) {
+                 async function(data) {
                      // Save the access token so that it's used in future calls
                      mySpotifyApi.setAccessToken(data.body['access_token']);
                      mySpotifyApi.setRefreshToken(data.body['refresh_token']);
                      console.log('The access token has been refreshed!');
-
+                     await updateTokens('ABCD', data.body['access_token'], data.body['refresh_token']);
                      obtain_results(
                          function() {
                              results['access_token'] = data.body['access_token'];
@@ -350,25 +351,32 @@ const { read, access } = require('fs');
  app.get('/group', async function(req, res) {
     console.log("GROUP LOADED");
     console.log(req.method + " " + req.route.path);
-    // if (req.query.group_name == "") {
-        access_code = randomString(4, "A#");
-    // }
-    // else {
-        // access_code = req.query.pin1 + req.query.pin2 + req.query.pin3 + req.query.pin4;
-        // console.log("join" + access_code);
-    // }
-    results['access_code'] = access_code;
-    results['group_name'] = req.query.group_name;
-    console.log(results['access_code']);
-    console.log(results['display_name']);
-    console.log(results['group_name']);
-    if (!await accessCodeExists(access_code)) {
-        console.log("code dne so create group");
-        await createGroup(results['access_code'], results['group_name'], results['display_name']);
-        await updateTokens(results['access_code'], mySpotifyApi.getAccessToken(), mySpotifyApi.getRefreshToken());
+    if (req.query.group_name) {
+        results['access_code'] = randomString(4, "A#");
+        results['group_name'] = req.query.group_name;
+        if (!await accessCodeExists(results['access_code'])) {
+            console.log("code dne so create group");
+            await createGroup(results['access_code'], results['group_name'], results['display_name']);
+            await updateTokens(results['access_code'], mySpotifyApi.getAccessToken(), mySpotifyApi.getRefreshToken());
+        }
+        else {
+            console.log("ERROR: group dne");
+            // SHOW ERROR MESSAGE SOMEHOW????? REDIRECT BACK TO CREATEJOIN
+        }
     }
     else {
-        console.log("group found in db");
+        results['access_code'] = req.query.pin1 + req.query.pin2 + req.query.pin3 + req.query.pin4;
+        console.log("join " + results['access_code']);
+        results['group_name'] = await getGroupName(results['access_code']);
+        if (!await accessCodeExists(results['access_code'])) {
+            console.log("ERROR: access code dne");
+            // SHOW ERROR MESSAGE SOMEHOW????? REDIRECT BACK TO CREATEJOIN
+        }
+        else {
+            console.log("group found in db");
+            await addToGroup(results['access_code'], results['display_name']);
+            await updateTokens(results['access_code'], mySpotifyApi.getAccessToken(), mySpotifyApi.getRefreshToken());
+        }
     }
     res.render('group.html', { results: JSON.stringify(results) });
  });
