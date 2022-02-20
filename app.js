@@ -225,7 +225,9 @@
                  members: {
                      [host]: { display_name: display_name }
                  },
-                 count: 1
+                 count: 1,
+                 generating: false,
+                 playlist_id: "invalid"
              }
          });
      } else {
@@ -301,6 +303,30 @@
          });
 
  }
+
+  // Checks and returns generating flag
+  async function checkGeneratingFlag(code) {
+    const dbRef = ref(database);
+    let snapshot = await get(child(dbRef, code + "/generating"));
+    if (snapshot.exists()) {
+        console.log("the generating flag is " + snapshot.val());
+        return snapshot.val();
+    } else {
+        return false;
+    }
+}
+
+// Returns generated playlist ID, or null if it doesn't exist yet
+async function getGeneratedPlaylist(code) {
+    const dbRef = ref(database);
+    let snapshot = await get(child(dbRef, code + "/playlist_id"));
+    if (snapshot.exists()) {
+        return snapshot.val();
+    } else {
+        return "";
+    }
+}
+
 
  async function followPlaylist(code, username, playlistID) {
      let spotifyApi = await createSpotifyAPIObject(code, username);
@@ -464,10 +490,11 @@
              results['loading_songs'].push(user_songs[j].id);
          }
      }
-     res.send(results);
-     //  } else {
-     //  res.send("no_refresh")
-     //  }
+     if (await checkGeneratingFlag(results['access_token'])) {
+        res.render('loading.html', { results: JSON.stringify(results) });
+     } else {
+        res.send(results);
+     }
  });
 
  module.exports = { createSpotifyAPIObject, getTopSongs, getAudioFeatures, createPlaylist, getPlaylists, getPlaylistTracks, getSavedTracks, areTracksSaved, getRecommendations, getGroupUsernames, getGroupMembers, followPlaylist };
@@ -475,13 +502,28 @@
  var { generatePlaylist } = require('./algorithm.js')
 
  app.get('/generate', async function(req, res) {
-     let length = req.query.length;
-     let playlist = await generatePlaylist(results['access_code'], results['group_name'], parseInt(length));
-     if (playlist) {
-         res.send(playlist)
-     } else {
-         res.send("error")
-     }
+     console.log(req.method + " " + req.route.path);
+     if (!await checkGeneratingFlag(results['access_code'])) {
+        await update(child(dbRef, results['access_code']), {
+            generating: true
+        });
+
+        console.log("generating playlist for " + results['access_code'])
+        let playlist = await generatePlaylist(results['access_code'], results['group_name']);
+        if (playlist) {
+            res.send(playlist)
+            await update(child(dbRef, results['access_code']), {
+                playlist_id: playlist
+            });
+            return;
+        } else {
+            res.send("error");
+            return;
+        }
+    }
+    while (await getGeneratedPlaylist(results['access_code']) == "invalid") {}
+    let playlist_id = await getGeneratedPlaylist(results['access_code']);
+    res.send(playlist_id);
  });
 
  console.log('Listening on 8888');
