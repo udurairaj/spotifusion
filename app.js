@@ -238,6 +238,8 @@
      const dbRef = ref(database);
      let snapshot = await get(child(dbRef, code + "/members/"));
      if (snapshot.exists()) {
+         var count = snapshot.val().length;
+         console.log("count" + count + " snap " + snapshot.val())
          await update(child(dbRef, code + "/members/"), {
              [username]: { display_name: display_name }
          });
