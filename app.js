@@ -434,34 +434,6 @@
  });
 
  app.get('/refresh_members', async function(req, res) {
-<<<<<<< HEAD
-    let old_members = results['group_members']
-<<<<<<< HEAD
-    results['group_members'] = await getGroupMembers(results['access_code']);
-    console.log("LENGTH:", Object.keys(old_members).length);
-    if (Object.keys(old_members).length != Object.keys(results['group_members']).length) {
-=======
-    let new_members = await getGroupMembers(results['access_code']);
-    if (Object.keys(old_members).length != Object.keys(new_members).length) {
-        results['group_members'] = new_members;
->>>>>>> b81a2d0c2186bc80a171cd09f89b65e651a75050
-        results['loading_songs'] = [];
-        let usernames = await getGroupMembers(results['access_code']);
-        console.log(usernames);
-        for (const user in usernames) {
-            // Call API for specific person and get 5 top songs
-            console.log("is this working? " + user);
-            let user_songs = await getTopSongs(results['access_code'], user, 0, 2, "short_term");
-            console.log("USER SONGS:", user_songs);
-            for (let j = 0; j < user_songs.length; j++) {
-                results['loading_songs'].push(user_songs[j].id);
-            }
-        }
-        res.send(results);
-    } else {
-        res.send("no_refresh")
-    }
-=======
      var old_members = results['group_members']
      var new_members = await getGroupMembers(results['access_code']);
      console.log("LENGTHS: ", Object.keys(old_members).length, Object.keys(new_members).length);
@@ -484,7 +456,6 @@
      //  } else {
      //  res.send("no_refresh")
      //  }
->>>>>>> 5693beb01f5e7957ccf2355fcca99393e949479f
  });
 
  module.exports = { createSpotifyAPIObject, getTopSongs, getAudioFeatures, createPlaylist, getPlaylists, getPlaylistTracks, getSavedTracks, areTracksSaved, getRecommendations, getGroupUsernames, getGroupMembers };
