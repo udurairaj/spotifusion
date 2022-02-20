@@ -320,6 +320,8 @@ async function MainLoop() {
 async function generatePlaylist(access_code, group) {
     code = access_code;
     group_name = group;
+    playlist_length = playlist_lengths[length];
+    console.log("playlist length is " + playlist_length + " at index " + length)
     let members = await getGroupMembers(code);
     users = Object.keys(members);
     num_users = users.length;
