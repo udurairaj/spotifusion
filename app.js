@@ -30,7 +30,7 @@
 
  var client_id = 'd6cc8aeb975e401b9a736b0a64ae9f48'; // Your client id
  var client_secret = 'aad2cb7f1c8d41c396b4f9c28ccfed66'; // Your secret
- var redirect_uri = 'https://spotifusion.herokuapp.com/createjoin.html'; // Your redirect uri
+ var redirect_uri = 'https://spotifusion.herokuapp.com/createjoin/'; // Your redirect uri
  var scopes = ['user-read-private', 'user-read-email', 'user-top-read', 'playlist-modify-public', 'playlist-read-collaborative', 'playlist-read-private', 'user-library-read'],
      state = 'spotify_auth_state';
  var mySpotifyApi = new SpotifyWebApi({
@@ -62,7 +62,7 @@
          const spotifyApi__ = new SpotifyWebApi({
              clientId: 'd6cc8aeb975e401b9a736b0a64ae9f48',
              clientSecret: 'aad2cb7f1c8d41c396b4f9c28ccfed66',
-             redirectUri: 'https://spotifusion.herokuapp.com/createjoin.html'
+             redirectUri: 'https://spotifusion.herokuapp.com/createjoin/'
          });
 
          spotifyApi__.setAccessToken(access_token);
