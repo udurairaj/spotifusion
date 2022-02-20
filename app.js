@@ -383,6 +383,8 @@
             await updateTokens(results['access_code'], mySpotifyApi.getAccessToken(), mySpotifyApi.getRefreshToken());
         }
     }
+    console.log(results['access_code']);
+    console.log(results['group_name']);
     res.render('group.html', { results: JSON.stringify(results) });
  });
 

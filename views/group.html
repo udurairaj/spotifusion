@@ -24,7 +24,7 @@
             <h1 id="name-of-group" class="display-1 pt-5">group name</h1>
         </div>
         <div id="pin" class="pe-3 ps-3">
-            <h1 class="display-2">access code: <span id="access-code" class="spotify">1234</span></h1>
+            <h1 class="display-2">access code: <span id="access-code" class="spotify">....</span></h1>
         </div>
         <div id="users-joined" class="center-box mt-5 p-2">
             <h1 id="whos-in" class="display-2">who's in?</h1>
@@ -61,31 +61,18 @@
     </div>
 
     <script type="text/javascript">
-        let queryString = window.location.search;
-        const urlParams = new URLSearchParams(queryString);
-        let group_name = urlParams.get('group-name');
+        const results = '<%= results %>'
+            .replace(/&#34;/g, '"')
+            .replace(/&#39;/g, "'");
 
-        let pin1 = urlParams.get('pin1');
-        let pin2 = urlParams.get('pin2');
-        let pin3 = urlParams.get('pin3');
-        let pin4 = urlParams.get('pin4');
-        let access_code = pin1 + pin2 + pin3 + pin4;
-        let freeze_code = 0;
+        const resultsJSON = JSON.parse(results);
+        console.log(resultsJSON);
 
-        if (access_code) {
-            //SEARCH DB FOR PIN
-            document.querySelector("#access-code").innerHTML = access_code;
-            //IF FOUND, FILL #GROUP WITH GROUP NAME
-            //THEN PRINT PIN FOR OTHERS TO JOIN
-        } else if (group_name) {
-            document.querySelector("#name-of-group").innerHTML = group_name;
-            if (!freeze_code) {
-                access_code = results['access_code'];
-                freeze_code = 1;
-            }
-            document.querySelector("#access-code").innerHTML = access_code;
-        }
-
+        console.log("IN GROUP.HTML");
+        console.log(resultsJSON['access_code']);
+        console.log(resultsJSON['group_name']);
+        document.querySelector("#access-code").innerHTML = resultsJSON['access_code'];
+        document.querySelector("#name-of-group").innerHTML = resultsJSON['group_name'];
 
         //THEN POLL AND SHOW WHO HAS JOINED
 
