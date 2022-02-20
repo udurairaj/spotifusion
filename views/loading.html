@@ -73,17 +73,7 @@
             let spotify_player_url = "https://open.spotify.com/embed/track/" + track_id + "?utm_source=generator";
             document.querySelector("iframe").src = spotify_player_url;
         //}
-
-        console.log(resultsJSON);
-        console.log(resultsJSON['loading_songs']);
-
-        const randSong = resultsJSON['loading_songs'][Math.floor(Math.random() * resultsJSON['loading_songs'].length)];
-        //for(const song in resultsJSON['loading_songs']) {
-            console.log("song: " + randSong);
-            let track_id = randSong;
-            let spotify_player_url = "https://open.spotify.com/embed/track/" + track_id + "?utm_source=generator";
-            document.querySelector("iframe").src = spotify_player_url;
-        //}
+       
     </script>
 
 </body>
