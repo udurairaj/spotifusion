@@ -262,8 +262,11 @@
  // Returns recommendations based on seed tracks
  async function getRecommendations(code, username, seed_tracks) {
 <<<<<<< HEAD
+<<<<<<< HEAD
      let spotifyApi = await createSpotifyAPIObject(code, username);
 =======
+=======
+>>>>>>> e1ea1c46c0b0e599858a579bc43d452393b9633f
     let spotifyApi = await createSpotifyAPIObject(code, username);
 >>>>>>> e1ea1c46c0b0e599858a579bc43d452393b9633f
      return spotifyApi.getRecommendations({
@@ -517,6 +520,9 @@
  });
 
  module.exports = { createSpotifyAPIObject, getTopSongs, getAudioFeatures, createPlaylist, getPlaylists, getPlaylistTracks, getSavedTracks, areTracksSaved, getRecommendations, getGroupUsernames, getGroupMembers };
+<<<<<<< HEAD
+>>>>>>> e1ea1c46c0b0e599858a579bc43d452393b9633f
+=======
 >>>>>>> e1ea1c46c0b0e599858a579bc43d452393b9633f
 
  var { generatePlaylist } = require('./algorithm.js')
@@ -534,7 +540,11 @@
 
  console.log('Listening on 8888');
 <<<<<<< HEAD
+<<<<<<< HEAD
  app.listen(app.get('port'));
+=======
+ app.listen(8888);
+>>>>>>> e1ea1c46c0b0e599858a579bc43d452393b9633f
 =======
  app.listen(8888);
 >>>>>>> e1ea1c46c0b0e599858a579bc43d452393b9633f
