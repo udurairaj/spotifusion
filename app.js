@@ -116,34 +116,32 @@
          });
  }
 
- async function createPlaylistHelper(code, username, title, description) {
-     let spotifyApi = await createSpotifyAPIObject(code, username);
+ async function addToPlaylist(code, username, id, trackURIs) {
+    let spotifyApi = await createSpotifyAPIObject(code, username);
+     //console.log("ID:", id);
+      return spotifyApi.addTracksToPlaylist(id, trackURIs)
+        .then(function(data) {
+            //console.log('Added tracks to playlist!');
+            return data;
+        }, function(err) {
+            console.log('Something went wrong!', err);
+        });
+}
 
-     return spotifyApi.createPlaylist(title, { 'description': description, 'public': true })
-         .then(function(data) {
-             //console.log('Created playlist!');
-             return data.id;
-         }, function(err) {
-             console.log('Something went wrong!', err);
-         });
-
- }
-
- // Returns URI of created playlist to embed into web app
  async function createPlaylist(code, username, title, description, trackURIs) {
-     let spotifyApi = await createSpotifyAPIObject(code, username);
-     let helper_promise = createPlaylistHelper(code, username, title, description);
-     let id = "";
-     helper_promise.then(function(result) { id = result; })
+    let spotifyApi = await createSpotifyAPIObject(code, username);
 
-     return spotifyApi.addTracksToPlaylist(id, trackURIs)
-         .then(function(data) {
-             //console.log('Added tracks to playlist!');
-             return uri;
-         }, function(err) {
-             console.log('Something went wrong!', err);
-         });
- }
+    return spotifyApi.createPlaylist(title, { 'description': description, 'public': true })
+        .then(function(data) {
+            for (let i = 0; i < trackURIs.length / 100; i++) {
+              addToPlaylist(code, username, data.body.id, trackURIs.slice(100 * i, 100 * (i + 1)));
+            }
+            return data.body.id;
+        }, function(err) {
+            console.log('Something went wrong!', err);
+        });
+
+}
 
  async function getPlaylists(code, username, offset, length) {
      let spotifyApi = await createSpotifyAPIObject(code, username);
@@ -302,4 +300,4 @@
  console.log('Listening on 8888');
  app.listen(8888);
 
- module.exports = { createSpotifyAPIObject, getTopSongs, getAudioFeatures, createPlaylist };
+ module.exports = { createSpotifyAPIObject, getTopSongs, getAudioFeatures, createPlaylist, getPlaylists, getPlaylistTracks };
