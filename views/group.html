@@ -36,7 +36,7 @@
             </div>
         </div>
         <div class="mt-5">
-            <form method="GET" action="loading.html">
+            <form>
                 <label for="time" class="me-3 fs-3">playlist length:</label>
                 <select id="time" class="p-2 fs-3" name="time">
 				  <option value="0">thirty minutes</option>
@@ -108,7 +108,7 @@
             })
             .done(function(res) {
                 if (res != "no_refresh") {
-                    userlist = res;
+                    userlist = res['group_members'];
                     let div = document.querySelector("#list-users");
                     div.replaceChildren();
                     for (const user in userlist) {
@@ -124,10 +124,25 @@
             })
 
         }, 3000);
-        
 
-        //ADD INPUT FOR AMOUNT OF TIME
-        //EVERYBODY's IN BUTTON
+        $("form").on("submit", function(e) {
+            e.preventDefault();
+            $.ajax({
+                    method: "GET",
+                    url: "loading.html",
+                    data: {
+                        results: results
+                    },
+                    async: true
+                })
+                .done(function(res) {
+                    location.href = "loading.html?results=" + results;
+                })
+                .fail(function(res) {
+                    console.log("FAILED")
+                })
+ 
+        })
     </script>
 </body>
 

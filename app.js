@@ -50,6 +50,9 @@
  app.set('view engine', 'html');
  app.use(express.static(path.join(__dirname + '/views/')));
 
+
+ let results = {};
+
  async function createSpotifyAPIObject(code, username) {
      // retrieve access and refresh token of username from database
      let access_token = "";
@@ -116,7 +119,7 @@
      })
  }
 
- async function updateTokens(code, access_token, refresh_token) {
+ async function updateTokens(code, access_token, refresh_token, display_name) {
      let username = await getMyUsername();
      console.log("username " + username)
      if (username == undefined) {
@@ -130,10 +133,10 @@
  }
 
  // Returns array of songs
- async function getTopSongs(code, username, offset, length) {
+ async function getTopSongs(code, username, offset, length, time_range) {
      let spotifyApi = await createSpotifyAPIObject(code, username);
      //console.log("CREATED API OBJECT")
-     return spotifyApi.getMyTopTracks({ limit: length, offset: offset })
+     return spotifyApi.getMyTopTracks({ limit: length, offset: offset, time_range: time_range })
          .then(function(data) {
              let topTracks = data.body.items;
              return topTracks;
@@ -232,15 +235,15 @@
 
  // Adds user to group
  async function addToGroup(code, username, display_name) {
-     const dbRef = ref(database);
-     let snapshot = await get(child(dbRef, code + "/members/"));
-     if (snapshot.exists()) {
-         await update(child(dbRef, code + "/members/"), {
-             [username]: { display_name: display_name }
-         });
-     } else {
-         console.log("ERROR: Group doesn't exist")
-     }
+    const dbRef = ref(database);
+    let snapshot = await get(child(dbRef, code + "/members/"));
+    if (snapshot.exists()) {
+        await update(child(dbRef, code + "/members/"), {
+            [username]: { display_name: display_name }
+        });
+    } else {
+        console.log("ERROR: Group doesn't exist")
+    }
  }
 
  // Returns array of songs
@@ -256,7 +259,7 @@
  }
 
  // Returns recommendations based on seed tracks
- async function getRecommendations(seed_tracks) {
+ async function getRecommendations(code, username, seed_tracks) {
     let spotifyApi = await createSpotifyAPIObject(code, username);
      return spotifyApi.getRecommendations({
              seed_tracks: seed_tracks
@@ -303,8 +306,6 @@
      for (var i = length; i > 0; --i) result += mask[Math.floor(Math.random() * mask.length)];
      return result;
  }
-
- let results = {};
 
  function obtain_results(success, fail) {
      mySpotifyApi.getMe().then(function(data) {
@@ -411,6 +412,20 @@
     }
     console.log(results['access_code']);
     console.log(results['group_name']);
+
+    results['loading_songs'] = [];
+    let usernames = await getGroupMembers(results['access_code']);
+    console.log(usernames);
+    for (const user in usernames) {
+        // Call API for specific person and get 5 top songs
+        console.log("is this working? " + user);
+        let user_songs = await getTopSongs(results['access_code'], user, 0, 2, "short_term");
+        console.log("USER SONGS:", user_songs);
+        for (let j = 0; j < user_songs.length; j++) {
+            results['loading_songs'].push(user_songs[j].id);
+        }
+    }
+
     res.render('group.html', { results: JSON.stringify(results) });
  });
 
@@ -418,18 +433,38 @@
     let old_members = results['group_members']
     results['group_members'] = await getGroupMembers(results['access_code']);
     if (Object.keys(old_members).length != Object.keys(results['group_members']).length) {
-        res.send(results['group_members']);
+        results['loading_songs'] = [];
+        let usernames = await getGroupMembers(results['access_code']);
+        console.log(usernames);
+        for (const user in usernames) {
+            // Call API for specific person and get 5 top songs
+            console.log("is this working? " + user);
+            let user_songs = await getTopSongs(results['access_code'], user, 0, 2, "short_term");
+            console.log("USER SONGS:", user_songs);
+            for (let j = 0; j < user_songs.length; j++) {
+                results['loading_songs'].push(user_songs[j].id);
+            }
+        }
+        res.send(results);
     } else {
         res.send("no_refresh")
     }
  });
 
- app.get('loading.html', function(req, res) {
-     console.log("PPSTY POSTY");
- });
+ module.exports = { createSpotifyAPIObject, getTopSongs, getAudioFeatures, createPlaylist, getPlaylists, getPlaylistTracks, getSavedTracks, areTracksSaved, getRecommendations, getGroupUsernames, getGroupMembers };
 
+ var { generatePlaylist } = require('./algorithm.js')
+ 
+ app.get('/generate', async function(req, res) {
+     console.log(req.method + " " + req.route.path);
+     console.log("generating playlist for " + results['access_code'])
+     let playlist = await generatePlaylist(results['access_code'], results['group_name']);
+     if (playlist) {
+         res.send(playlist)
+     } else {
+         res.send("error")
+     }
+ });
 
  console.log('Listening on 8888');
  app.listen(8888);
-
- module.exports = { createSpotifyAPIObject, getTopSongs, getAudioFeatures, createPlaylist, getPlaylists, getPlaylistTracks, getSavedTracks, areTracksSaved };
