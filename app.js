@@ -447,7 +447,7 @@
          // Call API for specific person and get 5 top songs
          console.log("is this working? " + user);
          let user_songs = await getTopSongs(results['access_code'], user, 0, 2, "short_term");
-         console.log("USER SONGS:", user_songs);
+         //  console.log("USER SONGS:", user_songs);
          for (let j = 0; j < user_songs.length; j++) {
              results['loading_songs'].push(user_songs[j].id);
          }
