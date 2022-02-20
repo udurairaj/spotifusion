@@ -262,6 +262,17 @@
 
  }
 
+ function randomString(length, chars) {
+     var mask = '';
+     if (chars.indexOf('a') > -1) mask += 'abcdefghijklmnopqrstuvwxyz';
+     if (chars.indexOf('A') > -1) mask += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+     if (chars.indexOf('#') > -1) mask += '0123456789';
+     if (chars.indexOf('!') > -1) mask += '~`!@#$%^&*()_+-={}[]:";\'<>?,./|\\';
+     var result = '';
+     for (var i = length; i > 0; --i) result += mask[Math.floor(Math.random() * mask.length)];
+     return result;
+ }
+
  let results = {};
 
  function obtain_results(success, fail) {
@@ -300,7 +311,6 @@
              // Set the access token on the API object to use it in later calls
              mySpotifyApi.setAccessToken(data.body['access_token']);
              mySpotifyApi.setRefreshToken(data.body['refresh_token']);
-             await updateTokens("ABCD", data.body['access_token'], data.body['refresh_token']);
              obtain_results(
                  function() {
                      results['access_token'] = data.body['access_token'];
@@ -334,6 +344,23 @@
          }
      );
 
+ });
+
+ app.get('/group', async function(req, res) {
+     console.log("GROUP LOADED");
+     console.log(req.method + " " + req.route.path);
+     access_code = randomString(4, "A#");
+     results['access_code'] = access_code;
+     results['group_name'] = req.query.group_name;
+     console.log(results['access_code']);
+     console.log(results['display_name']);
+     console.log(results['group_name']);
+     if (!await accessCodeExists(access_code)) {
+         console.log("code dne");
+         await createGroup(results['access_code'], results['group_name'], results['display_name']);
+         await updateTokens(results['access_code'], mySpotifyApi.getAccessToken(), mySpotifyApi.getRefreshToken());
+     }
+     res.render('group.html', { results: JSON.stringify(results) });
  });
 
  app.get('loading.html', function(req, res) {
