@@ -334,7 +334,7 @@
  app.get('/createjoin', function(req, res) {
      console.log(req.method + " " + req.route.path);
 
-     const current_url = new url('http://spotifusion.herokuapp.com' + req.url);
+     const current_url = new url('https://spotifusion.herokuapp.com' + req.url);
      const authCode = current_url.searchParams.get('code');
 
      // Retrieve an access token and a refresh token
