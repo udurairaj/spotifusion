@@ -121,12 +121,10 @@
                     console.log("FAILED")
                 })
 
-        }, 5000);
+        }, 10000);
 
         $("form").on("submit", function(e) {
             e.preventDefault();
-            let length = $('#time').val();
-            console.log(length)
             $.ajax({
                     method: "GET",
                     url: "loading.html",
@@ -136,7 +134,7 @@
                     async: true
                 })
                 .done(function(res) {
-                    location.href = "loading.html?results=" + results + "&length=" + length;
+                    location.href = "loading.html?results=" + results;
                 })
                 .fail(function(res) {
                     console.log("FAILED")
