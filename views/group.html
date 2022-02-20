@@ -28,32 +28,30 @@
         </div>
         <div id="users-joined" class="center-box mt-5 p-2">
             <h1 id="whos-in" class="display-2">who's in?</h1>
-            <div id="list-users">
+            <div id="list-users" class="user center-box">
                 <!-- DYNAMICALLY LOAD FROM DB -->
-                <div class="user center-box">
-                    <h3 class="display-name">erica_goose</h3>
-                    <h3 class="display-name">uma_buma</h3>
-                    <h3 class="display-name">yush</h3>
-                </div>
+                <!-- <h3 class="display-name">erica_goose</h3>
+                <h3 class="display-name">uma_buma</h3>
+                <h3 class="display-name">yush</h3> -->
             </div>
         </div>
         <div class="mt-5">
             <form method="GET" action="loading.html">
                 <label for="time" class="me-3 fs-3">playlist length:</label>
                 <select id="time" class="p-2 fs-3" name="time">
-				  <option value="thirty">thirty minutes</option>
-				  <option value="one">one hour</option>
-				  <option value="two">two hours</option>
-				  <option value="three">three hours</option>
-				  <option value="four">four hours</option>
-				  <option value="five">five hours</option>
-				  <option value="six">six hours</option>
-				  <option value="seven">seven hours</option>
-				  <option value="eight">eight hours</option>
-				  <option value="nine">nine hours</option>
-				  <option value="ten">ten hours</option>
-				  <option value="eleven">eleven hours</option>
-				  <option value="twelve">twelve hours</option>
+				  <option value="0">thirty minutes</option>
+				  <option value="1">one hour</option>
+				  <option value="2">two hours</option>
+				  <option value="3">three hours</option>
+				  <option value="4">four hours</option>
+				  <option value="5">five hours</option>
+				  <option value="6">six hours</option>
+				  <option value="7">seven hours</option>
+				  <option value="8">eight hours</option>
+				  <option value="9">nine hours</option>
+				  <option value="10">ten hours</option>
+				  <option value="11">eleven hours</option>
+				  <option value="12">twelve hours</option>
 				</select>
                 <input class="btn btn-lg btn-custom mt-5" type="submit" value="everybody's in!">
             </form>
@@ -75,24 +73,22 @@
         document.querySelector("#name-of-group").innerHTML = resultsJSON['group_name'];
 
         //THEN POLL AND SHOW WHO HAS JOINED
-        let userlist = "";
 
+        var intervalId = window.setInterval(function(){
+            let userlist = resultsJSON['group_members'];
+            let div = document.querySelector("#list-users");
+            div.replaceChildren();
+            for (const user in userlist) {
+                let tag = document.createElement("h3");
+                tag.classList.add("display-name");
+                tag.innerHTML = userlist[user].display_name;
+                div.appendChild(tag);
+            }
+        }, 1000);
+        
 
         //ADD INPUT FOR AMOUNT OF TIME
         //EVERYBODY's IN BUTTON
-
-
-
-        function randomString(length, chars) {
-            var mask = '';
-            if (chars.indexOf('a') > -1) mask += 'abcdefghijklmnopqrstuvwxyz';
-            if (chars.indexOf('A') > -1) mask += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            if (chars.indexOf('#') > -1) mask += '0123456789';
-            if (chars.indexOf('!') > -1) mask += '~`!@#$%^&*()_+-={}[]:";\'<>?,./|\\';
-            var result = '';
-            for (var i = length; i > 0; --i) result += mask[Math.floor(Math.random() * mask.length)];
-            return result;
-        }
     </script>
 </body>
 

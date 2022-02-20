@@ -387,6 +387,8 @@
             console.log("code dne so create group");
             await createGroup(results['access_code'], results['group_name'], results['username'], results['display_name']);
             await updateTokens(results['access_code'], mySpotifyApi.getAccessToken(), mySpotifyApi.getRefreshToken());
+            results['group_members'] = await getGroupMembers(results['access_code']);
+            console.log(results['group_members']);
         }
         else {
             console.log("ERROR: group dne");
