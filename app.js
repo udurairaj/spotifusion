@@ -81,9 +81,21 @@
      })
  }
 
+ async function getMyEmail() {
+     return mySpotifyApi.getMe().then(function(data) {
+         console.log("email is " + data.body)
+         return data.body.email;
+     }, function(err) {
+         console.error(err);
+     })
+ }
+
  async function updateTokens(access_token, refresh_token) {
      let username = await getMyUsername();
      console.log("username " + username)
+     if (username == undefined) {
+         username = await getMyEmail();
+     }
      const dbRef = ref(database);
      await update(child(dbRef, "ABCD" + "/members/" + username), {
          access_token: access_token,
@@ -173,23 +185,35 @@
      return snapshot.exists();
  }
 
- // If access code / group doesn't exist, creates group in database
- // Adds user to group
- async function addToGroup(code, username) {
+ // Creates group in database
+ async function createGroup(code, name, host) {
      const dbRef = ref(database);
-     let snapshot = await get(child(dbRef, code + "/members/"));
+     let snapshot = await get(child(dbRef, code));
      if (!snapshot.exists()) {
          await update(child(dbRef, "/"), {
              [code]: {
+                 name: name,
                  members: {
-                     [username]: { access_token: "invalid" }
+                     [host]: { access_token: "invalid" }
                  }
              }
          });
      } else {
+         console.log("ERROR: Group already exists")
+     }
+ }
+
+
+ // Adds user to group
+ async function addToGroup(code, username) {
+     const dbRef = ref(database);
+     let snapshot = await get(child(dbRef, code + "/members/"));
+     if (snapshot.exists()) {
          await update(child(dbRef, code + "/members/"), {
              [username]: { access_token: "invalid" }
          });
+     } else {
+         console.log("ERROR: Group doesn't exist")
      }
  }
 
@@ -257,14 +281,13 @@
              mySpotifyApi.setAccessToken(data.body['access_token']);
              mySpotifyApi.setRefreshToken(data.body['refresh_token']);
              await updateTokens(data.body['access_token'], data.body['refresh_token']);
-             await addToGroup("WXYZ", "NEW_USER")
              obtain_results(
                  function() {
                      results['access_token'] = data.body['access_token'];
                      console.log("results is " + JSON.stringify(results))
                      res.render('createjoin.html', { results: JSON.stringify(results) });
                  },
-                 function() { res.render('error.html'); });
+                 function() { console.log("ERRORERROR"); });
          },
          function(err) {
              console.log('Something went wrong! Refreshing token now...');
